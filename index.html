@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Castillo Portfolio</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS (utility classes used throughout the HTML below) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // This config must stay inline and load right after the Tailwind
+  // script tag above — Tailwind reads it before scanning the page.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#F6F7F9',
+          surface: '#FFFFFF',
+          ink: '#171923',
+          soft: '#5B5F6E',
+          line: '#E4E6EB',
+          accent: '#5170FF',
+          accentText: '#3F5CE0',
+        },
+        fontFamily: {
+          sans: ['"Inter"', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<!-- Your own custom styles -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="font-sans text-ink antialiased">
+
+  <!-- ============ NAV ============ -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-bg/90 backdrop-blur-sm border-b border-line">
+    <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#top" class="font-semibold text-base tracking-tight">Philippines, Muntinlupa City</a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden sm:flex gap-6 text-sm text-soft">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#work" class="nav-link">Work</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+
+      <!-- Mobile menu button -->
+      <button id="menu-button" class="sm:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile nav panel (hidden until toggled by script.js) -->
+    <nav id="mobile-menu" class="sm:hidden flex-col gap-1 px-6 pb-4 text-sm text-soft">
+      <a href="#about" class="py-2">About</a>
+      <a href="#work" class="py-2">Work</a>
+      <a href="#skills" class="py-2">Skills</a>
+      <a href="#contact" class="py-2">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top" class="max-w-3xl mx-auto px-6">
+
+    <!-- ============ HERO ============ -->
+    <section class="pt-36 pb-20 grid sm:grid-cols-[1fr_260px] gap-10 sm:items-center">
+      <div>
+        <p class="fade-in text-sm text-accentText font-semibold mb-4">Available for junior QA roles</p>
+        <h1 class="fade-in font-extrabold text-5xl sm:text-6xl leading-[1.1] tracking-tight mb-6 text-ink">
+          Robin Jerou E. Castillo
+        </h1>
+        <p class="fade-in-delay text-soft text-lg leading-relaxed max-w-xl mb-8">
+          <!-- REPLACE: one or two sentences in your own voice — what you build, what you care about, what kind of role you're looking for. -->
+          Fresh BSIT graduate focused on QA testing, AI, and Data Analystics. I love solving technical problems and keen on turning data into relevant insights.
+        </p>
+        <div class="fade-in-delay flex flex-wrap gap-4 items-center">
+          <a href="https://www.linkedin.com/in/robin-jerou-castillo/" target="_blank" rel="noopener noreferrer" class="inline-block bg-accentText text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-accent transition-colors">Get in touch</a>
+          <a href="documents/Resume_2026 Castillo.pdf" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Check résumé</a>
+        </div>
+      </div>
+      <!-- REPLACE src with your own photo. Any regular rectangular photo works — no crop applied besides fitting the frame. -->
+      
+      <div class="float-wrapper">
+  
+        <img src="pictures/CASTILLO ROBIN (2).jpg" alt="Pictoral Portrait of Robin Jerou E. Castillo" class="fade-in-delay float-image w-full aspect-[4/5] object-cover rounded-lg border border-line">
+        <div class="float-shadow"></div>  
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section id="about" class="py-16 border-t border-line grid sm:grid-cols-[120px_1fr] gap-6 sm:gap-10">
+      <p class="text-sm text-soft pt-1 font-medium">About</p>
+      <div class="max-w-xl">
+        <p class="leading-relaxed mb-4 text-ink">
+          <!-- REPLACE: 2-4 sentences. Who you are, your background, what got you into IT, what you're looking for. -->
+          I graduated with a degree in Information Technology with Specialization in Artificial Intelligence. Most of what I know I picked up from schoolworks and majorly completing the capstone project, wherein I attained the ability and mindset to work in a group and individual basis.
+          
+        </p>
+        <p class="leading-relaxed mb-4 text-ink">
+          I also developed a habit of being detail-oriented and started with applying the SDLC cycle in my own class projects and target into actually understanding the process/phasses effectively. 
+        </p>
+
+        <p class="leading-relaxed mb-4 text-ink">
+          During my practicum period of 5 months, I gained experience in a role as a QA intern at 1902 Software Development Corporation. I handled automation testing for the WriteText.AI plugin in WordPress WooCommerce in both Staging and Live Production environments.
+        </p>
+
+        <p class="leading-relaxed mb-4 text-ink">
+          I am always looking for opportunities to learn and grow in the field of IT.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ WORK ============ -->
+    <section id="work" class="py-16 border-t border-line">
+      <p class="text-sm text-soft mb-8 font-medium">Selected Projects</p>
+
+      <!-- Project row template — duplicate this block for each project (3-5 total) -->
+      <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
+        <div>
+          <h3 class="font-semibold text-2xl mb-2 text-ink">SideEye: Presence Detection Guidance for Visual Impairment</h3>
+          <p class="text-soft leading-relaxed max-w-md mb-3">
+            <!-- REPLACE: what it is, your role, and one interesting decision or challenge — not just a feature list. -->
+            Assistive Navigation System using several ESP32 and sensors (mmwave and tof) that assists as well as alerts during the travel of destination and from obstacles.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag px-2.5 py-1 rounded">Add Icon Python</span>
+            <span class="tag px-2.5 py-1 rounded">Add Icon C++ (Arduino)</span>
+            <span class="tag px-2.5 py-1 rounded">Add Icon Kotlin</span>
+          </div>
+        </div>
+        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+          <button type="button" class="video-trigger link-underline text-sm text-ink hover:text-accentText" data-video="videos/SideEye Demo.mp4">Recorded Demo</button>
+          <a href="https://github.com/robinjerou/SideEye.git" class="link-underline text-sm text-ink hover:text-accentText" target="_blank" rel="noopener noreferrer">Code</a>
+        </div>
+      </div>
+
+      <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
+        <div>
+          <h3 class="font-semibold text-2xl mb-2 text-ink">UniSouth: Enrollment and Institution Portal System</h3>
+          <p class="text-soft leading-relaxed max-w-md mb-3">
+            Revolves around the principles of Front-end and Back-end development, which simplifies student enrollment and academic access while helping school administrators efficiently manage student records, courses, grades, and other academic information
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag px-2.5 py-1 rounded">C#</span>
+            <span class="tag px-2.5 py-1 rounded">.Net/WPF</span>
+          </div>
+        </div>
+        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+          <a class="video-trigger link-underline text-sm text-ink hover:text-accentText" data-video="videos/Castillo Finals Event Driven.mp4" tabindex="0" role="button">Recorded Demo</a>
+          <a href="https://github.com/robinjerou/UniSouth.git" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Code</a>
+        </div>
+      </div>
+
+       <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
+        <div>
+          <h3 class="font-semibold text-2xl mb-2 text-ink">Data Analysis Fire Statistics Report</h3>
+          <p class="text-soft leading-relaxed max-w-md mb-3">
+            Created dashboard and visualizations from the data of Bureau of Fire Protection government agency that helps out the awareness or produce strategies towards Fire Prevention Month in the Philippines.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag px-2.5 py-1 rounded">Power BI</span>
+            <!--<span class="tag px-2.5 py-1 rounded">Excel</span>-->
+            <!--<span class="tag px-2.5 py-1 rounded">JavaScript</span>-->
+          </div>
+        </div>
+        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+          <a href="documents/finals fire statistics publish - castillo.pbix" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Download File</a>
+        </div>
+      </div>
+
+      <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
+        <div>
+          <h3 class="font-semibold text-2xl mb-2 text-ink">EEC Travel and Tourism Web App</h3>
+          <p class="text-soft leading-relaxed max-w-md mb-3">
+            Client-based that handles booking, applications, and    Conducted mostly on the Front-end and SEO
+            A one-line description of what this project does and the specific problem it solves.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag px-2.5 py-1 rounded">WordPress</span>
+            <span class="tag px-2.5 py-1 rounded">Elementor</span>
+            <span class="tag px-2.5 py-1 rounded">CSS</span>
+          </div>
+        </div>
+        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+          <a href="videos/website eec.mp4 eec.mp4" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Recorded Demo</a>
+        </div>
+      </div>
+
+       <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
+        <div>
+          <h3 class="font-semibold text-2xl mb-2 text-ink">PawfectCarePH</h3>
+          <p class="text-soft leading-relaxed max-w-md mb-3">
+            Pet Supplement POS and Inventory Management System, which
+            replaces manual sales and stock tracking with a centralized, real-time system.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag px-2.5 py-1 rounded">HTML</span>
+            <span class="tag px-2.5 py-1 rounded">CSS</span>
+            <span class="tag px-2.5 py-1 rounded">JavaScript</span>
+          </div>
+        </div>
+        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+          <a href="https://pawfect-care-ph-pet-supplement-pos.vercel.app/PawfectCarePH/ims-menu.html" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Live site</a>
+          <a href="https://github.com/robinjerou/PawfectCarePH-Pet-Supplement-POS-and-Inventory-Management-System" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Code</a>
+        </div>
+      </div>
+
+      <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
+        <div>
+          <h3 class="font-semibold text-2xl mb-2 text-ink">EEC Event Management System</h3>
+          <p class="text-soft leading-relaxed max-w-md mb-3">
+            Establishes as a web-based event and beauty service reservation system that allow users book and find venues, check services, and look for available personnel online. This reduces scheduling conflicts, long wait times, and the hassle of in-person or phone reservations.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag px-2.5 py-1 rounded">HTML</span>
+            <span class="tag px-2.5 py-1 rounded">CSS</span>
+            <span class="tag px-2.5 py-1 rounded">JavaScript</span>
+          </div>
+        </div>
+        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+          <a href="https://robinjerou.github.io/EEC-Event-Management-System/" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Live site</a>
+          <a href="https://github.com/robinjerou/EEC-Event-Management-System.git" class="link-underline text-sm text-ink hover:text-accentText">Code</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SKILLS ============ -->
+    <section id="skills" class="py-16 border-t border-line grid sm:grid-cols-[120px_1fr] gap-6 sm:gap-10">
+      <p class="text-sm text-soft pt-1 font-medium">Skills</p>
+      <div class="grid sm:grid-cols-2 gap-8 max-w-xl">
+        <div>
+          <p class="text-sm text-ink font-semibold mb-3">Languages</p>
+          <p class="text-soft leading-relaxed">Python, C#, SQL, HTML, CSS, JavaScript, C++</p>
+        </div>
+        <div>
+          <p class="text-sm text-ink font-semibold mb-3">Tools &amp; frameworks</p>
+          <p class="text-soft leading-relaxed">WordPress, WooCommerce, Elementor, PowerBI, BugBug.io, LambdaTest KaneAI, SmartUI, CloudQAT, Tailwind CSS, VS Code/Visual Studio/Android Studio/Eclipse, Figma,  Jupyter Notebook, PlatformIO</p>
+        </div>
+        <div>
+          <p class="text-sm text-ink font-semibold mb-3">Currently learning</p>
+          <p class="text-soft leading-relaxed">Selenium, Playwright, Power Apps, Git &amp; GitHub, React, REST APIs</p>
+        </div>
+        <div>
+          <p class="text-sm text-ink font-semibold mb-3">Also comfortable with other technolgoies such as</p>
+          <p class="text-soft leading-relaxed">Microsoft Azure, basic networking, virtual machines, AI agents in LangChain, excel, and etc.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section id="contact" class="py-20 border-t border-line">
+      <h2 class="font-extrabold text-4xl mb-5 max-w-lg tracking-tight text-ink">Open to IT-related roles<span class="pulse-dot">.</span></h2>
+      <p class="text-soft mb-8 max-w-md leading-relaxed">
+        <!--You many contact me through email or phone-->
+        The fastest way to reach me is email. I usually reply within a day.
+      </p>
+      <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+        
+        <div class="relative inline-block">
+          <a href="mailto:robinjerouecastillo@gmail.com"
+            class="copy-toggle link-underline text-ink hover:text-accentText"
+            data-copy="robinjerouecastillo@gmail.com">Email</a>
+
+      <!-- Tooltip: shows the address on hover -->
+            <span class="copy-tooltip pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink text-white text-xs px-2 py-1 opacity-0 transition-opacity duration-200">
+              robinjerouecastillo@gmail.com
+            </span>
+
+      <!-- "Copied" popup: shows briefly after clicking -->
+            <span class="copied-popup pointer-events-none absolute left-1/2 -translate-x-1/2 -top-9 rounded-full bg-ink text-white text-xs px-3 py-1 opacity-0 transition-opacity duration-300">
+              Copied
+            </span>
+        </div>
+        
+        <div class="relative inline-block">
+          <a href="tel:+639621792918"
+            class="copy-toggle link-underline text-ink hover:text-accentText"
+            data-copy="+639621792918">Contact Number</a>
+
+      <!-- Tooltip: shows the address on hover -->
+            <span class="copy-tooltip pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink text-white text-xs px-2 py-1 opacity-0 transition-opacity duration-200">
+              +639621792918
+            </span>
+
+      <!-- "Copied" popup: shows briefly after clicking -->
+            <span class="copied-popup pointer-events-none absolute left-1/2 -translate-x-1/2 -top-9 rounded-full bg-ink text-white text-xs px-3 py-1 opacity-0 transition-opacity duration-300">
+              Copied
+            </span>
+        </div>
+        
+        <!--<a href="robinjerouecastillo@gmail.com" class="link-underline text-ink hover:text-accentText">Email</a>-->
+        <!--<a href="09621792918" class="link-underline text-ink hover:text-accentText">Contact Number</a>-->
+        <a href="https://github.com/robinjerou" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText">GitHub</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-3xl mx-auto px-6 py-8 border-t border-line text-xs text-soft">
+    © 2026 Robin Jerou E. Castillo Portfolio
+  </footer>
+
+  <!-- All "Recorded Demo" links across every project reuse this same modal. -->
+  <div id="video-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 px-4">
+    <div class="relative w-full max-w-3xl">
+      <button id="video-modal-close" aria-label="Close video" class="absolute -top-10 right-0 text-white text-2xl leading-none hover:text-accent transition-colors">✕</button>
+      <div class="aspect-video w-full rounded-lg overflow-hidden bg-black">
+        <video id="video-modal-player" class="w-full h-full" controls>
+          <source src="" type="video/mp4">
+          Your browser doesn't support embedded video.
+        </video>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Your own JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
