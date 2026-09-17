@@ -173,3 +173,16 @@ document.addEventListener('keydown', (e) => {
     closeVideoModal();
   }
 });
+
+// scroll progress bar function
+window.addEventListener("scroll", () => {
+  const scrollTop = window.scrollY;
+  const documentHeight = document.documentElement.scrollHeight;
+  const windowHeight = window.innerHeight;
+
+  const scrollPercentage =
+    (scrollTop / (documentHeight - windowHeight)) * 100;
+
+  document.getElementById("scroll-progress").style.width =
+    scrollPercentage + "%";
+});

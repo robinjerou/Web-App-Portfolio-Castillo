@@ -219,4 +219,15 @@ html, body {
 }
 
 
+/* Scroll Progress Bar at the top*/
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 0%;
+  background-color: #5170FF;
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
 
