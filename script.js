@@ -2,7 +2,6 @@
 // Mobile navigation menu toggle
 // Opens/closes the nav links on small screens
 // where there isn't room for the full menu bar.
-// ============================================
 
 const menuButton = document.getElementById('menu-button');
 const mobileMenu = document.getElementById('mobile-menu');
@@ -21,7 +20,7 @@ mobileMenu.querySelectorAll('a').forEach((link) => {
   });
 });
 
-// ============================================
+
 // Email copy-to-clipboard with "Copied" popup
 // ============================================
 /*document.querySelectorAll('.email-copy').forEach((link) => {
@@ -39,9 +38,7 @@ mobileMenu.querySelectorAll('a').forEach((link) => {
   });
 });*/
 
-// ============================================
 // Email tooltip toggle + copy-to-clipboard
-// ============================================
 /*document.querySelectorAll('.email-copy').forEach((link) => {
   link.addEventListener('click', (e) => {
     e.preventDefault(); // stop it from opening a mail client
@@ -65,9 +62,7 @@ mobileMenu.querySelectorAll('a').forEach((link) => {
   });
 });
 
-// ============================================
 // Click-to-copy toggle (used for email + phone)
-// ============================================
 document.querySelectorAll('.copy-toggle').forEach((link) => {
   link.addEventListener('click', (e) => {
     e.preventDefault(); // stop it from opening mail/dialer app
@@ -90,10 +85,8 @@ document.querySelectorAll('.copy-toggle').forEach((link) => {
   });
 });*/
 
-// ============================================
 // Click-to-copy toggle (used for email + phone)
 // Only one tooltip can be open at a time.
-// ============================================
 document.querySelectorAll('.copy-toggle').forEach((link) => {
   link.addEventListener('click', (e) => {
     e.preventDefault(); // stop it from opening mail/dialer app
@@ -185,4 +178,42 @@ window.addEventListener("scroll", () => {
 
   document.getElementById("scroll-progress").style.width =
     scrollPercentage + "%";
+});
+
+
+// flip function
+document.querySelectorAll('.flip-toggle').forEach((button) => {
+  const card = button.closest('.flip-card');
+  const front = card.querySelector('.flip-card-front');
+  const back = card.querySelector('.flip-card-back');
+
+  button.addEventListener('click', () => {
+    const isFlipped = card.classList.toggle('flipped');
+    button.setAttribute('aria-pressed', String(isFlipped));
+    button.setAttribute(
+      'aria-label',
+      isFlipped ? 'Show project details' : 'Show project preview image'
+    );
+
+    // Keep whichever face is turned away from the viewer
+    // out of the tab order and off screen readers' radar.
+    if ('inert' in front) {
+      front.inert = isFlipped;
+      back.inert = !isFlipped;
+    }
+  });
+});
+
+// If a preview image hasn't been added yet, show a friendly
+// placeholder instead of a broken image icon.
+document.querySelectorAll('.flip-preview-img').forEach((img) => {
+  img.addEventListener(
+    'error',
+    () => {
+      img.classList.add('hidden');
+      const placeholder = img.nextElementSibling;
+      if (placeholder) placeholder.classList.remove('hidden');
+    },
+    { once: true }
+  );
 });

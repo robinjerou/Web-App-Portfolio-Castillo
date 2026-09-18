@@ -34,16 +34,16 @@
   }
 </script>
 
-<!-- Your own custom styles -->
+
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
 </head>
 <body class="font-sans text-ink antialiased">
 
-<!-- Scroll Progress Bar -->
+<!-- scroll progress bar -->
 <div id="scroll-progress"></div>
 
-  <!-- ============ NAV ============ -->
+  <!-- navigation bar -->
   <header class="fixed top-0 left-0 right-0 z-50 bg-bg/90 backdrop-blur-sm border-b border-line">
     <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
       <a href="#top" class="font-semibold text-base tracking-tight">Philippines, Muntinlupa City</a>
@@ -77,7 +77,7 @@
 
   <main id="top" class="max-w-3xl mx-auto px-6">
 
-    <!-- ============ HERO ============ -->
+    <!-- HERO section  -->
     <section class="pt-36 pb-20 grid sm:grid-cols-[1fr_260px] gap-10 sm:items-center">
       <div>
         <p class="fade-in text-sm text-accentText font-semibold mb-4">Available for junior QA roles</p>
@@ -85,7 +85,6 @@
           Robin Jerou E. Castillo
         </h1>
         <p class="fade-in-delay text-soft text-lg leading-relaxed max-w-xl mb-8">
-          <!-- REPLACE: one or two sentences in your own voice — what you build, what you care about, what kind of role you're looking for. -->
           Fresh BSIT graduate focused on QA testing, AI, and Data Analystics. I love solving technical problems and keen on turning data into relevant insights.
         </p>
         <div class="fade-in-delay flex flex-wrap gap-4 items-center">
@@ -93,7 +92,6 @@
           <a href="documents/Resume_2026 Castillo.pdf" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText">Check résumé</a>
         </div>
       </div>
-      <!-- REPLACE src with your own photo. Any regular rectangular photo works — no crop applied besides fitting the frame. -->
       
       <div class="float-wrapper">
   
@@ -102,12 +100,11 @@
       </div>
     </section>
 
-    <!-- ============ ABOUT ============ -->
+    <!-- ABOUT section -->
     <section id="about" class="py-16 border-t border-line grid sm:grid-cols-[120px_1fr] gap-6 sm:gap-10">
       <p class="text-sm text-soft pt-1 font-medium">About</p>
       <div class="max-w-xl">
         <p class="leading-relaxed mb-4 text-ink">
-          <!-- REPLACE: 2-4 sentences. Who you are, your background, what got you into IT, what you're looking for. -->
           I graduated with a degree in Information Technology with Specialization in Artificial Intelligence. Most of what I know I picked up from schoolworks and majorly completing the capstone project, wherein I attained the ability and mindset to work in a group and individual basis.
           
         </p>
@@ -125,36 +122,49 @@
       </div>
     </section>
 
-    <!-- ============ WORK ============ -->
+    <!-- WORK section -->
     <section id="work" class="py-16 border-t border-line">
       <p class="text-sm text-soft mb-8 font-medium">Selected Projects</p>
 
-      <!-- Project row template — duplicate this block for each project (3-5 total) -->
       <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
-        <div>
-          <h3 class="font-semibold text-2xl mb-2 text-ink">SideEye: Presence Detection Guidance for Visual Impairment</h3>
-          <p class="text-soft leading-relaxed max-w-md mb-3">
-            <!-- REPLACE: what it is, your role, and one interesting decision or challenge — not just a feature list. -->
-            Assistive Navigation System using several ESP32 and sensors (mmwave and tof) that assists as well as alerts during the travel of destination and from obstacles.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <!-- <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><i class="devicon-python-plain plain colored text-sm"></i> Python</span>
-            <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><i class="devicon-cplusplus-plain colored text-sm"></i> C++ (Arduino)</span>
-            <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><i class="devicon-kotlin-plain colored text-sm"></i> Kotlin</span> -->
+        <div class="flip-card relative">
+          <button type="button" class="flip-toggle" aria-pressed="false" aria-label="Show project preview image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+          </button>
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <h3 class="font-semibold text-2xl mb-2 text-ink">SideEye: Presence Detection Guidance for Visual Impairment</h3>
+                <p class="text-soft leading-relaxed max-w-md mb-3">
+                  Assistive Navigation System using several ESP32 and sensors (mmwave and tof) that assists the <strong>Visually Impaired</strong>, as well as alerts during the travel of destination and from obstacles.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <!-- <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><i class="devicon-python-plain plain colored text-sm"></i> Python</span>
+                  <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><i class="devicon-cplusplus-plain colored text-sm"></i> C++ (Arduino)</span>
+                  <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><i class="devicon-kotlin-plain colored text-sm"></i> Kotlin</span> -->
 
-            <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><img src="https://cdn.simpleicons.org/python" alt="Python" class="w-4 h-4"> Python</span>
-            <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><img src="https://cdn.simpleicons.org/cplusplus" alt="C++ (Arduino)" class="w-4 h-4"> C++ (Arduino)</span>
-            <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><img src="https://cdn.simpleicons.org/kotlin" alt="Kotlin" class="w-4 h-4"> Kotlin</span>
-
-            <span>
+                  <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><img src="https://cdn.simpleicons.org/python" alt="Python" class="w-4 h-4"> Python</span>
+                  <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><img src="https://cdn.simpleicons.org/cplusplus" alt="C++ (Arduino)" class="w-4 h-4"> C++ (Arduino)</span>
+                  <span class="tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded"><img src="https://cdn.simpleicons.org/kotlin" alt="Kotlin" class="w-4 h-4"> Kotlin</span>
+                </div>
+              </div>
+              <div class="flip-card-back rounded-lg overflow-hidden border border-line">
+                <img src="pictures/Daddy Android App.png" alt="Preview screenshot of the SideEye system" class="flip-preview-img">
+                <div class="flip-placeholder hidden">Add a preview image at <code>pictures/previews/sideeye.png</code></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
+              <!--<button type="button" class="video-trigger link-underline text-sm text-ink hover:text-accentText" data-video="videos/SideEye Demo.mp4">Recorded Demo</button>-->
+              <a href="https://youtu.be/PGryY_Swmx4" class="link-underline text-sm text-ink hover:text-accentText" target="_blank" rel="noopener noreferrer">Recorded Demo</a>
+              <a href="https://github.com/robinjerou/SideEye.git" class="link-underline text-sm text-ink hover:text-accentText" target="_blank" rel="noopener noreferrer">Code</a>
           </div>
         </div>
-        <div class="flex sm:flex-col sm:items-end gap-4 sm:gap-2 sm:text-right sm:pt-1">
-          <!--<button type="button" class="video-trigger link-underline text-sm text-ink hover:text-accentText" data-video="videos/SideEye Demo.mp4">Recorded Demo</button>-->
-          <a href="https://youtu.be/PGryY_Swmx4" class="link-underline text-sm text-ink hover:text-accentText" target="_blank" rel="noopener noreferrer">Recorded Demo</a>
-          <a href="https://github.com/robinjerou/SideEye.git" class="link-underline text-sm text-ink hover:text-accentText" target="_blank" rel="noopener noreferrer">Code</a>
-        </div>
-      </div>
+
 
       <div class="project-row py-7 grid sm:grid-cols-[1fr_auto] gap-4 sm:items-start">
         <div>
@@ -275,11 +285,11 @@
       </div>
     </section>
 
-    <!-- ============ CONTACT ============ -->
+    <!-- CONTACT section -->
     <section id="contact" class="py-20 border-t border-line">
       <h2 class="font-extrabold text-4xl mb-5 max-w-lg tracking-tight text-ink">Open to IT-related roles<span class="pulse-dot">.</span></h2>
       <p class="text-soft mb-8 max-w-md leading-relaxed">
-        <!--You many contact me through email or phone-->
+        <!--alternative? You many contact me through email or phone-->
         The fastest way to reach me is email. I usually reply within a day.
       </p>
       <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
@@ -341,8 +351,6 @@
     </div>
   </div>
 
-  
-  <!-- Your own JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>
