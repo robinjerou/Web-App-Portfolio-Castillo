@@ -245,7 +245,7 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
   if (!mascot) return;
 
 
-  /* =======================================================
+  /* 
     MASCOT CHANGE:
     Get the two sprite layers.
       */
@@ -254,7 +254,7 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
   const reactionSprite = mascot.querySelector(".mascot-reaction");
 
 
-  /* =======================================================
+  /* 
     MASCOT CHANGE:
     3x3 sprite-sheet positions.
 
@@ -282,7 +282,7 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
   };
 
 
-  /* =======================================================
+  /* 
     MASCOT CHANGE:
     Start with the center-facing sprite.
       */
@@ -445,7 +445,7 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
   }
 
 
-  /* =======================================================
+  /* 
     MASCOT CHANGE:
     Click/tap reaction.
 
@@ -574,5 +574,23 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
 
   });
 
-
 })();
+
+
+//back-to-top function
+const backToTop = document.getElementById("backToTop");
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+      backToTop.classList.remove("hidden");
+    } else {
+      backToTop.classList.add("hidden");
+    }
+  });
+
+  backToTop.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });

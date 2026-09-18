@@ -353,11 +353,10 @@ html, body {
 /* MASCOT CHANGE:
   Main mascot element.
 
-  Change 140px here if you want the character
-  larger or smaller.
+  Change 140px (original size) to change character size
 */
 .portfolio-mascot {
-  --mascot-size: 140px;
+  --mascot-size: 200px;
 
   position: relative;
 
@@ -495,7 +494,7 @@ html, body {
 }
 
 
-/* =========================================================
+/* 
   REDUCED MOTION
   MASCOT CHANGE:
   Respect users who have requested reduced animation.
