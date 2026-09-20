@@ -202,14 +202,53 @@ html, body {
 
 @keyframes tronBlast {
   0%   { width: 0; opacity: 0; }
-  5%   { opacity: 1; }
-  35%  { width: 55vw; opacity: 0.9; }
-  55%  { width: 55vw; opacity: 0; }
+  3%   { opacity: 1; }
+  22%  { width: 100vw; opacity: 0.9; }   /* head leaves the right edge */
+  34%  { width: 100vw; opacity: 0; }
   100% { width: 0; opacity: 0; }
 }
 
+/* Beam re-enters from the left edge and stops at "Open" */
+.pulse-target {
+  position: relative;
+  animation: openGlow 2.5s ease-in-out infinite;
+}
+
+.pulse-target::before {
+  content: '';
+  position: absolute;
+  right: calc(100% + 0.12em);   /* ends just before the "O" */
+  bottom: 0.3em;                /* same height as the first beam */
+  width: 100vw;
+  height: 3px;
+  background: linear-gradient(to right, rgba(81, 112, 255, 0) 0%, #5170FF 70%, #A6B8FF 100%);
+  box-shadow: 0 0 8px 1px rgba(81, 112, 255, 0.8);
+  transform-origin: left center;
+  transform: scaleX(0);
+  opacity: 0;
+  pointer-events: none;
+  animation: tronWrap 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes tronWrap {
+  0%, 20% { transform: scaleX(0); opacity: 0; }
+  22%     { opacity: 1; }
+  46%     { transform: scaleX(1); opacity: 0.9; }   /* head reaches "Open" */
+  60%     { transform: scaleX(1); opacity: 0; }
+  100%    { transform: scaleX(0); opacity: 0; }
+}
+
+/* "Open" lights up when the beam arrives */
+@keyframes openGlow {
+  0%, 42%   { text-shadow: none; }
+  48%       { text-shadow: 0 0 14px rgba(81, 112, 255, 0.9), 0 0 28px rgba(81, 112, 255, 0.5); }
+  66%, 100% { text-shadow: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pulse-dot::after {
+  .pulse-dot::after,
+  .pulse-target,
+  .pulse-target::before {
     animation: none;
   }
 }
@@ -514,7 +553,41 @@ html, body {
   }
 }
 
+/* Mascot label */
+.mascot-label {
+  position: absolute;
+  top: 4%;
+  left: -6%;
+  transform: rotate(-20deg);
+  transform-origin: right bottom;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #3F5CE0;
+  text-shadow: 0 0 10px rgba(81, 112, 255, 0.35);
+  animation: labelWiggle 2.4s ease-in-out infinite;
+}
 
+@keyframes labelWiggle {
+  0%, 100% { transform: rotate(-20deg) translateY(0); }
+  50%      { transform: rotate(-16deg) translateY(-4px); }
+}
+
+@media (max-width: 640px) {
+  .mascot-label {
+    font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-label {
+    animation: none;
+  }
+}
+
+
+/* Side bar effects */
 #side-fx {
   --fx-blue: 81, 112, 255;
   --fx-cyan: 56, 189, 248;

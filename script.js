@@ -244,11 +244,7 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
   if (!mascot) return;
 
 
-  /* 
-    MASCOT CHANGE:
-    Get the two sprite layers.
-      */
-
+  //MASCOT CHANGE: Get the two sprite layers.
   const directionSprite = mascot.querySelector(".mascot-direction");
   const reactionSprite = mascot.querySelector(".mascot-reaction");
 
@@ -595,16 +591,16 @@ const backToTop = document.getElementById("backToTop");
   });
 
   
-
+// side bar effect particles function
 (function initSideFx() {
  
   const canvas = document.getElementById('side-fx-canvas');
   if (!canvas) return;
- 
+
   const ctx = canvas.getContext('2d');
   const main = document.querySelector('main');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
- 
+
   //CONFIG
   const CONFIG = {
     // Particle colors (R, G, B). Matches the site's blue accent + a touch of cyan.
@@ -629,9 +625,8 @@ const backToTop = document.getElementById("backToTop");
   let rafId = null;
   let lastTime = 0;
   let clock = 0;
- 
- 
-  /* ---------- Pre-rendered sprites (much cheaper than shadowBlur) ---------- */
+
+  //Pre-rendered sprites (much cheaper than shadowBlur)
   function makeGlowSprite(rgb) {
     const size = 64;
     const c = document.createElement('canvas');
@@ -645,7 +640,7 @@ const backToTop = document.getElementById("backToTop");
     g.fillRect(0, 0, size, size);
     return c;
   }
- 
+
   function makeTrailSprite(rgb) {
     const c = document.createElement('canvas');
     c.width = 128;
@@ -658,53 +653,53 @@ const backToTop = document.getElementById("backToTop");
     g.fillRect(0, 0, 128, 4);
     return c;
   }
- 
+
   const glowSprites = CONFIG.colors.map(makeGlowSprite);
   const trailSprites = CONFIG.colors.map(makeTrailSprite);
- 
- 
-  /* ---------- Helpers ---------- */
+
+
+  //Helpers
   const rand = (min, max) => min + Math.random() * (max - min);
- 
+
   function resize() {
     const rect = canvas.getBoundingClientRect();
     w = rect.width;
     h = rect.height;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
- 
+
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
- 
+
     isMobile = w < 640;
- 
+
     // Empty space between the screen edge and the content column.
     // Particles fade out by the time they reach the content.
     const gutter = main ? main.getBoundingClientRect().left + 16 : w * 0.25;
     maxTravel = isMobile ? w * 0.22 : Math.max(gutter, w * 0.15);
- 
+
     // Rebuild the particle pool for the new size
     let count = Math.round(h / CONFIG.density);
     count = Math.max(CONFIG.minCount, Math.min(CONFIG.maxCount, count));
     if (isMobile) count = Math.round(count * CONFIG.mobileScale);
- 
+
     particles = [];
     for (let i = 0; i < count; i++) {
       const p = {};
       spawn(p, true);
       particles.push(p);
     }
- 
+
     // With reduced motion, draw one still frame instead of animating
     if (reducedMotion.matches) render();
   }
- 
+
   // Give a particle fresh starting values.
   // initial = true spreads them along their path so the screen isn't empty at load.
   function spawn(p, initial) {
     const fromLeft = Math.random() < 0.5;
     const r = Math.random();
- 
+
     p.dir = fromLeft ? 1 : -1;                        // +1 moves right, -1 moves left
     p.startX = fromLeft ? rand(-4, 14) : w - rand(-4, 14);
     p.y = rand(0, h);
@@ -721,30 +716,30 @@ const backToTop = document.getElementById("backToTop");
     p.baseAlpha = rand(0.7, 1);
     p.dist = initial ? rand(0, p.travel) : 0;
   }
- 
- 
+
+
   /* ---------- Draw ---------- */
   function render() {
     ctx.clearRect(0, 0, w, h);
     const globalAlpha = isMobile ? CONFIG.mobileAlpha : 1;
- 
+
     for (const p of particles) {
       const t = p.dist / p.travel;                     // 0 at the edge -> 1 at the end
       const age = p.dist / p.speed;
- 
+
       const fadeIn = Math.min(1, p.dist / 24);
       // Stay bright for the first third of the trip, then fade out toward the center
       const fadeOut = t < 0.3 ? 1 : Math.pow(1 - (t - 0.3) / 0.7, 1.4);
       const twinkle = 0.78 + 0.22 * Math.sin(clock * 3 + p.phase);
       const alpha = fadeIn * fadeOut * twinkle * p.baseAlpha * globalAlpha;
       if (alpha <= 0.01) continue;
- 
+
       const x = p.startX + p.dir * p.dist;
       const y = p.y + p.drift * age + Math.sin(age * p.freq + p.phase) * p.amp;
- 
+
       const glow = glowSprites[p.color];
       const rgb = CONFIG.colors[p.color].join(',');
- 
+
       if (p.kind === 'streak') {
         // Tron-style light trail behind the head
         const len = p.trail * (0.5 + 0.5 * fadeOut);
@@ -755,12 +750,12 @@ const backToTop = document.getElementById("backToTop");
         ctx.drawImage(trailSprites[p.color], -len, -1, len, 2);
         ctx.restore();
       }
- 
+
       // Soft glow around the particle
       const gs = p.size * 9;
       ctx.globalAlpha = alpha * 0.9;
       ctx.drawImage(glow, x - gs / 2, y - gs / 2, gs, gs);
- 
+
       // Solid core
       ctx.globalAlpha = alpha;
       ctx.fillStyle = 'rgb(' + rgb + ')';
@@ -775,23 +770,23 @@ const backToTop = document.getElementById("backToTop");
     }
     ctx.globalAlpha = 1;
   }
- 
- 
-  /* ---------- Animate ---------- */
+
+
+  //Animate
   function tick(now) {
     const dt = Math.min((now - lastTime) / 1000, 0.05);   // cap so tab switches don't cause jumps
     lastTime = now;
     clock += dt;
- 
+
     for (const p of particles) {
       p.dist += p.speed * dt;
       if (p.dist >= p.travel) spawn(p, false);             // recycle at the end of its path
     }
- 
+
     render();
     rafId = requestAnimationFrame(tick);
   }
- 
+
   function start() {
     if (rafId !== null || reducedMotion.matches) return;
     lastTime = performance.now();
@@ -802,24 +797,24 @@ const backToTop = document.getElementById("backToTop");
     if (rafId !== null) cancelAnimationFrame(rafId);
     rafId = null;
   }
- 
- 
-  /* ---------- Wire up ---------- */
+
+
+  //Wire up
   let resizeTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(resize, 150);
   });
- 
+
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop(); else start();
   });
- 
+
   reducedMotion.addEventListener('change', () => {
     if (reducedMotion.matches) { stop(); render(); } else { start(); }
   });
- 
+
   resize();
   start();
- 
+
 })();
