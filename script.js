@@ -596,203 +596,230 @@ const backToTop = document.getElementById("backToTop");
 
   
 
-  (() => {
-  'use strict';
-
-  //Settings
+(function initSideFx() {
+ 
+  const canvas = document.getElementById('side-fx-canvas');
+  if (!canvas) return;
+ 
+  const ctx = canvas.getContext('2d');
+  const main = document.querySelector('main');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+ 
+  //CONFIG
   const CONFIG = {
-    timezone: 'Asia/Manila',
-    latitude: 14.4081,          // Muntinlupa City
-    longitude: 121.0415,
-    refreshMinutes: 30,         // how often to ask the API again
-    edgeEcho: 0.45,             // 0 = edge matches the centre, 1 = edge shows the fully opposite time
+    // Particle colors (R, G, B). Matches the site's blue accent + a touch of cyan.
+    colors: [
+      [81, 112, 255],
+      [63, 92, 224],
+      [56, 189, 248]
+    ],
+    density: 12,        // one particle per this many px of screen height (lower = more)
+    minCount: 36,
+    maxCount: 120,
+    speed: [28, 95],    // px per second (slowest, fastest)
+    size: [1.1, 3],     // dot radius range in px
+    mobileScale: 0.5,   // fraction of particles on phones
+    mobileAlpha: 0.6    // overall opacity on phones
   };
-
-  //Colours: soft, luminous, never harsh.
-  //Each moment has 4 colours: [broad base, then three accents].
-  //Edit freely, this is the only place that sets the mood.
-  //The sunset is the "amber -> coral -> violet -> cobalt" of the
-  //reference; the night stays a gentle indigo, never black.
-  const PALETTES = {
-    night:     ['#2f3585', '#5a52c4', '#7c6dd0', '#c99ac4'],
-    predawn:   ['#3f4290', '#7a6cc4', '#c68fb8', '#f2b6a0'],
-    sunrise:   ['#f4a58a', '#f7c6a3', '#c8a2d6', '#8fb4ee'],
-    morning:   ['#a9d3f7', '#cfe6fb', '#f8e3c7', '#b7c8f0'],
-    midday:    ['#7fb8f0', '#a9d6f5', '#c9e8ea', '#8fa6ee'],
-    afternoon: ['#8fb6ee', '#b9d5f4', '#f5deb8', '#a89be0'],
-    golden:    ['#f2b062', '#f39a76', '#e58aa5', '#8f8fe0'],
-    sunset:    ['#ee8d6c', '#e0779a', '#a476cf', '#5b78d8'],
-    dusk:      ['#5a55c4', '#8a62c0', '#d2809f', '#3f5fc7'],
-  };
-
-  // Small helpers
-  const TAU = Math.PI * 2;
-  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-  const smooth = (t) => t * t * (3 - 2 * t);
-  const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
-  const lum = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-  const css = (c) => `rgb(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])})`;
-  for (const k of Object.keys(PALETTES)) PALETTES[k] = PALETTES[k].map(hex);
-
-  // Time in the Philippines 
-  const zoneFmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: CONFIG.timezone, hourCycle: 'h23',
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: 'numeric', minute: 'numeric', second: 'numeric',
-  });
-
-  function philippineNow() {
-    const d = new Date();
-    const p = {};
-    for (const part of zoneFmt.formatToParts(d)) p[part.type] = part.value;
-    const y = +p.year, mo = +p.month, day = +p.day;
-    const h = +p.hour % 24, mi = +p.minute, s = +p.second;
-    const offset = Math.round((Date.UTC(y, mo - 1, day, h, mi, s) - Math.floor(d.getTime() / 1000) * 1000) / 60000);
-    return { y, mo, day, offset, minutes: h * 60 + mi + s / 60 };
+ 
+  let w = 0, h = 0, dpr = 1;
+  let maxTravel = 0;        // how far a particle may drift inward
+  let isMobile = false;
+  let particles = [];
+  let rafId = null;
+  let lastTime = 0;
+  let clock = 0;
+ 
+ 
+  /* ---------- Pre-rendered sprites (much cheaper than shadowBlur) ---------- */
+  function makeGlowSprite(rgb) {
+    const size = 64;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, 'rgba(' + rgb + ', 1)');
+    grad.addColorStop(0.25, 'rgba(' + rgb + ', 0.55)');
+    grad.addColorStop(1, 'rgba(' + rgb + ', 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    return c;
   }
  
-  // Backup sunrise/sunset calculation (NOAA), used until the API answers
-  function solarTimes(now) {
-    const doy = Math.floor((Date.UTC(now.y, now.mo - 1, now.day) - Date.UTC(now.y, 0, 0)) / 864e5);
-    const g = (TAU / 365) * (doy - 1);
-    const eq = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g)
-      - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
-    const decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g)
-      - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g)
-      - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
-    const lat = (CONFIG.latitude * Math.PI) / 180;
-    const cosH = Math.cos((90.833 * Math.PI) / 180) / (Math.cos(lat) * Math.cos(decl))
-      - Math.tan(lat) * Math.tan(decl);
-    const H = (Math.acos(clamp(cosH, -1, 1)) * 180) / Math.PI;
-    const wrap = (v) => ((v % 1440) + 1440) % 1440;
-    return {
-      rise: wrap(720 - 4 * (CONFIG.longitude + H) - eq + now.offset),
-      set: wrap(720 - 4 * (CONFIG.longitude - H) - eq + now.offset),
-    };
+  function makeTrailSprite(rgb) {
+    const c = document.createElement('canvas');
+    c.width = 128;
+    c.height = 4;
+    const g = c.getContext('2d');
+    const grad = g.createLinearGradient(0, 0, 128, 0);
+    grad.addColorStop(0, 'rgba(' + rgb + ', 0)');
+    grad.addColorStop(1, 'rgba(' + rgb + ', 0.9)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 128, 4);
+    return c;
   }
-
-  // Real sun + sky from the Open-Meteo API
-  let api = null;   // { rise, set, cloud (0-1), rain (0-1) } once loaded
-  const params = new URLSearchParams(location.search);
-
-  const parseHM = (str) => {
-    const m = /T(\d\d):(\d\d)/.exec(str || '');
-    return m ? +m[1] * 60 + +m[2] : null;
-  };
-
-  async function loadSky() {
-    try {
-      const q = new URLSearchParams({
-        latitude: CONFIG.latitude,
-        longitude: CONFIG.longitude,
-        current: 'cloud_cover,precipitation,weather_code',
-        daily: 'sunrise,sunset',
-        timezone: CONFIG.timezone,
-        forecast_days: 1,
-      });
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?${q}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const c = data.current || {};
-      const code = c.weather_code || 0;
-      const wet = (c.precipitation || 0) > 0 || (code >= 51 && code <= 99);
-      api = {
-        rise: parseHM(data.daily && data.daily.sunrise && data.daily.sunrise[0]),
-        set: parseHM(data.daily && data.daily.sunset && data.daily.sunset[0]),
-        cloud: clamp((c.cloud_cover || 0) / 100),
-        rain: wet ? clamp(0.4 + (c.precipitation || 0) / 6, 0, 1) : 0,
-      };
-      refresh(3000);
-    } catch (err) {
-      console.warn('[side backgrounds] Could not reach the sky API, using the built-in sun calculation.', err);
+ 
+  const glowSprites = CONFIG.colors.map(makeGlowSprite);
+  const trailSprites = CONFIG.colors.map(makeTrailSprite);
+ 
+ 
+  /* ---------- Helpers ---------- */
+  const rand = (min, max) => min + Math.random() * (max - min);
+ 
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    w = rect.width;
+    h = rect.height;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+ 
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ 
+    isMobile = w < 640;
+ 
+    // Empty space between the screen edge and the content column.
+    // Particles fade out by the time they reach the content.
+    const gutter = main ? main.getBoundingClientRect().left + 16 : w * 0.25;
+    maxTravel = isMobile ? w * 0.22 : Math.max(gutter, w * 0.15);
+ 
+    // Rebuild the particle pool for the new size
+    let count = Math.round(h / CONFIG.density);
+    count = Math.max(CONFIG.minCount, Math.min(CONFIG.maxCount, count));
+    if (isMobile) count = Math.round(count * CONFIG.mobileScale);
+ 
+    particles = [];
+    for (let i = 0; i < count; i++) {
+      const p = {};
+      spawn(p, true);
+      particles.push(p);
     }
-    setTimeout(loadSky, CONFIG.refreshMinutes * 60000);
+ 
+    // With reduced motion, draw one still frame instead of animating
+    if (reducedMotion.matches) render();
   }
  
-  // From "what time is it" to colours
-  function paletteAt(t, rise, set) {
-    const noon = (rise + set) / 2;
-    const P = PALETTES;
-    const line = [
-      [rise - 100, P.night], [rise - 45, P.predawn], [rise + 5, P.sunrise], [rise + 90, P.morning],
-      [noon, P.midday], [set - 120, P.afternoon], [set - 45, P.golden], [set + 5, P.sunset],
-      [set + 45, P.dusk], [set + 100, P.night],
-    ];
-    if (t <= line[0][0] || t >= line[line.length - 1][0]) return P.night;
-    let i = 0;
-    while (i < line.length - 2 && t >= line[i + 1][0]) i++;
-    const [t0, a] = line[i], [t1, b] = line[i + 1];
-    const f = smooth(clamp((t - t0) / (t1 - t0)));
-    return a.map((c, k) => mix(c, b[k], f));
-  }
-
-  // Grey or rainy skies calm the colours down and cool them a little
-  function soften(c, cloud, rain) {
-    const g = lum(c);
-    c = mix(c, [g, g, g], cloud * 0.35);
-    c = mix(c, [236, 239, 246], cloud * 0.12);
-    return rain ? mix(c, [110, 130, 190], rain * 0.18) : c;
-  }
-
-  // 9 colours: 4 for next to the content, 4 for the screen edge, 1 for the blend between
-  function targetColours(minutes, rise, set, cloud, rain) {
-    const near = paletteAt(minutes, rise, set);
-    const opposite = paletteAt((minutes + 720) % 1440, rise, set);
-    const edge = near.map((c, i) => mix(c, opposite[i], CONFIG.edgeEcho));
-    const soft = (c) => soften(c, cloud, rain);
-    const n = near.map(soft), e = edge.map(soft);
-    return [...n, ...e, mix(n[1], e[1], 0.5)];
-  }
-
-  //Painting (with a gentle fade between colours)
-  const root = document.documentElement;
-  const NAMES = ['--near-1', '--near-2', '--near-3', '--near-4',
-                 '--edge-1', '--edge-2', '--edge-3', '--edge-4', '--side-mid'];
-  let shown = null;
-  let raf = 0;
+  // Give a particle fresh starting values.
+  // initial = true spreads them along their path so the screen isn't empty at load.
+  function spawn(p, initial) {
+    const fromLeft = Math.random() < 0.5;
+    const r = Math.random();
  
-  const apply = (cols) => cols.forEach((c, i) => root.style.setProperty(NAMES[i], css(c)));
+    p.dir = fromLeft ? 1 : -1;                        // +1 moves right, -1 moves left
+    p.startX = fromLeft ? rand(-4, 14) : w - rand(-4, 14);
+    p.y = rand(0, h);
+    p.travel = maxTravel * rand(0.35, 1);
+    p.speed = rand(CONFIG.speed[0], CONFIG.speed[1]);
+    p.drift = rand(-9, 5);                            // slight upward bias
+    p.amp = rand(0, 9);                               // gentle sideways wobble
+    p.freq = rand(0.8, 2.2);
+    p.phase = rand(0, Math.PI * 2);
+    p.size = rand(CONFIG.size[0], CONFIG.size[1]);
+    p.color = Math.floor(Math.random() * CONFIG.colors.length);
+    p.kind = r < 0.6 ? 'dot' : r < 0.85 ? 'streak' : 'square';
+    p.trail = rand(30, 90);
+    p.baseAlpha = rand(0.7, 1);
+    p.dist = initial ? rand(0, p.travel) : 0;
+  }
  
-  function goTo(next, ms) {
-    cancelAnimationFrame(raf);
-    if (!shown || !ms) { shown = next; apply(next); return; }
-    const from = shown, t0 = performance.now();
-    const step = (now) => {
-      const f = smooth(clamp((now - t0) / ms));
-      shown = from.map((c, i) => mix(c, next[i], f));
-      apply(shown);
-      if (f < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
+ 
+  /* ---------- Draw ---------- */
+  function render() {
+    ctx.clearRect(0, 0, w, h);
+    const globalAlpha = isMobile ? CONFIG.mobileAlpha : 1;
+ 
+    for (const p of particles) {
+      const t = p.dist / p.travel;                     // 0 at the edge -> 1 at the end
+      const age = p.dist / p.speed;
+ 
+      const fadeIn = Math.min(1, p.dist / 24);
+      // Stay bright for the first third of the trip, then fade out toward the center
+      const fadeOut = t < 0.3 ? 1 : Math.pow(1 - (t - 0.3) / 0.7, 1.4);
+      const twinkle = 0.78 + 0.22 * Math.sin(clock * 3 + p.phase);
+      const alpha = fadeIn * fadeOut * twinkle * p.baseAlpha * globalAlpha;
+      if (alpha <= 0.01) continue;
+ 
+      const x = p.startX + p.dir * p.dist;
+      const y = p.y + p.drift * age + Math.sin(age * p.freq + p.phase) * p.amp;
+ 
+      const glow = glowSprites[p.color];
+      const rgb = CONFIG.colors[p.color].join(',');
+ 
+      if (p.kind === 'streak') {
+        // Tron-style light trail behind the head
+        const len = p.trail * (0.5 + 0.5 * fadeOut);
+        ctx.globalAlpha = alpha * 0.8;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(p.dir, 1);                           // flips the trail for the right side
+        ctx.drawImage(trailSprites[p.color], -len, -1, len, 2);
+        ctx.restore();
+      }
+ 
+      // Soft glow around the particle
+      const gs = p.size * 9;
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.drawImage(glow, x - gs / 2, y - gs / 2, gs, gs);
+ 
+      // Solid core
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgb(' + rgb + ')';
+      if (p.kind === 'square') {
+        const s = p.size * 1.3;
+        ctx.fillRect(x - s / 2, y - s / 2, s, s);
+      } else {
+        ctx.beginPath();
+        ctx.arc(x, y, p.size * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
   }
-
-
-  //view options
-  const fixed = /^(\d{1,2}):(\d\d)$/.exec(params.get('sidetime') || '');
-  const fixedMinutes = fixed ? (+fixed[1] % 24) * 60 + +fixed[2] : null;
-  const demo = params.has('sidedemo');
-  const demoStart = performance.now();
-  const wxPreview = { cloudy: { cloud: 0.9, rain: 0 }, rain: { cloud: 1, rain: 0.8 }, clear: { cloud: 0, rain: 0 } }[params.get('sidewx')];
-
-  function refresh(ms) {
-    const now = philippineNow();
-    const sun = api && api.rise != null && api.set != null ? api : solarTimes(now);
-    let minutes = now.minutes;
-    if (fixedMinutes != null) minutes = fixedMinutes;
-    if (demo) minutes = (((performance.now() - demoStart) / 1000) * 36) % 1440;   // 36 min per second
-    const sky = wxPreview || api || { cloud: 0.15, rain: 0 };
-    goTo(targetColours(minutes, sun.rise, sun.set, sky.cloud, sky.rain), demo ? 0 : ms);
+ 
+ 
+  /* ---------- Animate ---------- */
+  function tick(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.05);   // cap so tab switches don't cause jumps
+    lastTime = now;
+    clock += dt;
+ 
+    for (const p of particles) {
+      p.dist += p.speed * dt;
+      if (p.dist >= p.travel) spawn(p, false);             // recycle at the end of its path
+    }
+ 
+    render();
+    rafId = requestAnimationFrame(tick);
   }
-
-  //Go
-  refresh(0);
-  if (demo) {
-    setInterval(() => refresh(0), 80);
-  } else {
-    // Light changes slowly, so a check every 30 seconds is plenty
-    if (fixedMinutes == null) setInterval(() => refresh(2500), 30000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(1500); });
-    if (!wxPreview) loadSky();
+ 
+  function start() {
+    if (rafId !== null || reducedMotion.matches) return;
+    lastTime = performance.now();
+    rafId = requestAnimationFrame(tick);
   }
+ 
+  function stop() {
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+ 
+ 
+  /* ---------- Wire up ---------- */
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 150);
+  });
+ 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+ 
+  reducedMotion.addEventListener('change', () => {
+    if (reducedMotion.matches) { stop(); render(); } else { start(); }
+  });
+ 
+  resize();
+  start();
+ 
 })();

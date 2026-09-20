@@ -44,11 +44,22 @@
 <div id="scroll-progress"></div>
 
 <!-- SIDE BACKGROUNDS -->
-<div class="side-bg side-bg--left" aria-hidden="true">
-  <div class="side-soft"><div class="side-shape"><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span></div></div>
-</div>
-<div class="side-bg side-bg--right" aria-hidden="true">
-  <div class="side-soft"><div class="side-shape"><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span><span class="side-blob"></span></div></div>
+<div id="side-fx" aria-hidden="true">
+  <div class="fx-edge fx-edge-left">
+    <div class="fx-glow"></div>
+    <div class="fx-orb fx-orb-a"></div>
+    <div class="fx-orb fx-orb-b"></div>
+    <div class="fx-dots"></div>
+    <div class="fx-line"><span class="fx-scan"></span></div>
+  </div>
+  <div class="fx-edge fx-edge-right">
+    <div class="fx-glow"></div>
+    <div class="fx-orb fx-orb-a"></div>
+    <div class="fx-orb fx-orb-b"></div>
+    <div class="fx-dots"></div>
+    <div class="fx-line"><span class="fx-scan"></span></div>
+  </div>
+  <canvas id="side-fx-canvas"></canvas>
 </div>
 
 

@@ -515,161 +515,133 @@ html, body {
 }
 
 
-:root {
-  /* Colours are set by sides.js from the real sun and sky.
-     The values below are only a fallback. */
-  --near-1: #8cc0f2;
-  --near-2: #a9d6f5;
-  --near-3: #c9e8ea;
-  --near-4: #8fa6ee;
-  --edge-1: #5a52c4;
-  --edge-2: #7c6dd0;
-  --edge-3: #c99ac4;
-  --edge-4: #2f3585;
-  --side-mid: #7c8fe0;
+#side-fx {
+  --fx-blue: 81, 112, 255;
+  --fx-cyan: 56, 189, 248;
+  --fx-width: clamp(70px, 22vw, 360px);
 
-  --side-pad: 80px;   /* hidden off-screen room so the blur never fades the screen edge */
-  --side-blur: 40px;  /* how soft the shape is */
-
-  /* Transparency from the screen edge (left) to the content (right):
-     fairly present at the edge, easing to fully see-through by the content */
-  --side-mask: linear-gradient(to right,
-    rgba(0, 0, 0, 0.80) 0,
-    rgba(0, 0, 0, 0.80) calc(var(--side-pad) + (100% - var(--side-pad)) * 0.08),
-    rgba(0, 0, 0, 0.70) calc(var(--side-pad) + (100% - var(--side-pad)) * 0.22),
-    rgba(0, 0, 0, 0.50) calc(var(--side-pad) + (100% - var(--side-pad)) * 0.42),
-    rgba(0, 0, 0, 0.30) calc(var(--side-pad) + (100% - var(--side-pad)) * 0.62),
-    rgba(0, 0, 0, 0.12) calc(var(--side-pad) + (100% - var(--side-pad)) * 0.82),
-    rgba(0, 0, 0, 0) 100%);
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-.side-bg {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .side-bg {
-    display: block;
-    position: fixed;
-    top: calc(var(--side-pad) * -1);
-    bottom: calc(var(--side-pad) * -1);
-    /* One gutter = the free space beside the 48rem content column */
-    width: calc(max(0px, (100vw - 48rem) / 2) + var(--side-pad));
-    z-index: -1;
-    pointer-events: none;
-    -webkit-mask-image: var(--side-mask);
-    mask-image: var(--side-mask);
-  }
-  .side-bg--left {
-    left: calc(var(--side-pad) * -1);
-  }
-  .side-bg--right {
-    right: calc(var(--side-pad) * -1);
-    transform: scaleX(-1);   /* mirror of the left side */
-  }
-
-  /* A whisper of film grain: keeps big soft gradients smooth (no banding)
-     and gives them a slightly frosted, printed feel. */
-  .side-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.07;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  }
-
-  /* Let the colour run up behind the header on the sides:
-     only the centre column keeps the frosted header bar. */
-  header.fixed {
-    background: transparent;
-    border-bottom: 0;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  header.fixed > div {
-    background: rgba(246, 247, 249, 0.9);
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
-    border-bottom: 1px solid #E4E6EB;
-  }
-}
-
-/* This layer does the blurring, so the edges of the shape melt away */
-.side-soft {
+#side-fx canvas {
   position: absolute;
   inset: 0;
-  filter: blur(var(--side-blur));
+  width: 100%;
+  height: 100%;
 }
- 
-/* The shape: full height at the screen edge, gently narrowing toward the
-   content. The top and bottom edges curve in rather than run straight. */
-.side-shape {
+
+.fx-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--fx-width);
+  overflow: hidden;
+}
+.fx-edge-left  { left: 0; }
+.fx-edge-right { right: 0; transform: scaleX(-1); }
+
+/* Base glow: soft light that breathes in and out */
+.fx-glow {
   position: absolute;
   inset: 0;
-  clip-path: polygon(
-    0% 0%, 20% 1.1%, 40% 3.2%, 60% 6.2%, 80% 9.8%, 100% 14%,
-    100% 86%, 80% 90.2%, 60% 93.8%, 40% 96.8%, 20% 98.9%, 0% 100%
-  );
-  background: linear-gradient(to right,
-    var(--edge-1) var(--side-pad),
-    var(--side-mid) 58%,
-    var(--near-1) 100%);
-  transform-origin: 30% 50%;
-  animation: side-breathe 12s ease-in-out infinite;
+  background:
+    linear-gradient(to right, rgba(var(--fx-blue), 0.20), rgba(var(--fx-blue), 0.06) 45%, transparent 100%),
+    radial-gradient(ellipse 100% 55% at 0% 50%, rgba(var(--fx-blue), 0.28), transparent 70%);
+  animation: fxBreathe 7s ease-in-out infinite alternate;
 }
- 
-/* Big soft colour clouds that drift very slowly toward the centre */
-.side-blob {
+
+/* Two blobs of light that slowly slide up and down the edge */
+.fx-orb {
   position: absolute;
-  width: 115%;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, var(--blob) 0%, transparent 70%);
-  opacity: 0.9;
+  left: 0;
+  width: 100%;
+  height: 60vh;
   will-change: transform;
-  animation: side-drift-a 48s ease-in-out infinite alternate;
 }
-.side-blob:nth-child(1) { --blob: var(--edge-2); left: -28%; top: -12%; animation-name: side-drift-a; animation-duration: 46s; animation-delay: -10s; }
-.side-blob:nth-child(2) { --blob: var(--edge-3); left: -22%; top: 34%;  animation-name: side-drift-b; animation-duration: 58s; animation-delay: -30s; }
-.side-blob:nth-child(3) { --blob: var(--edge-4); left: -26%; top: 72%;  animation-name: side-drift-c; animation-duration: 52s; animation-delay: -20s; }
-.side-blob:nth-child(4) { --blob: var(--near-2); left: 26%;  top: 2%;   animation-name: side-drift-c; animation-duration: 62s; animation-delay: -8s; }
-.side-blob:nth-child(5) { --blob: var(--near-3); left: 22%;  top: 40%;  animation-name: side-drift-a; animation-duration: 54s; animation-delay: -26s; }
-.side-blob:nth-child(6) { --blob: var(--near-4); left: 28%;  top: 76%;  animation-name: side-drift-b; animation-duration: 66s; animation-delay: -40s; }
-
-/* The right side plays the same motion in reverse so both sides
-   don't look like an exact mirror image */
-.side-bg--right .side-blob {
-  animation-direction: alternate-reverse;
-  animation-delay: -18s;
+.fx-orb-a {
+  background: radial-gradient(ellipse 90% 50% at 0% 50%, rgba(var(--fx-blue), 0.50), transparent 72%);
+  animation: fxOrbA 15s ease-in-out infinite alternate;
 }
-.side-bg--right .side-shape {
-  animation-delay: -6s;   /* breathes half a cycle apart */
+.fx-orb-b {
+  width: 75%;
+  height: 45vh;
+  background: radial-gradient(ellipse 90% 50% at 0% 50%, rgba(var(--fx-cyan), 0.38), transparent 72%);
+  animation: fxOrbB 21s ease-in-out infinite alternate;
 }
 
-@keyframes side-drift-a {
-  from { transform: translate3d(-4%, -3%, 0) scale(1); }
-  to   { transform: translate3d(22%, 10%, 0) scale(1.12); }
-}
-@keyframes side-drift-b {
-  from { transform: translate3d(0%, 6%, 0) scale(1.06); }
-  to   { transform: translate3d(26%, -9%, 0) scale(0.94); }
-}
-@keyframes side-drift-c {
-  from { transform: translate3d(-6%, 0%, 0) scale(0.96); }
-  to   { transform: translate3d(16%, 16%, 0) scale(1.14); }
-}
-
-/* A slow breath: about 6 seconds in, 6 seconds out */
-@keyframes side-breathe {
-  0%, 100% { transform: scale(1);    opacity: 0.88; }
-  50%      { transform: scale(1.04); opacity: 1; }
+/* Dotted grid that fades toward the center and drifts upward */
+.fx-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(var(--fx-blue), 0.6) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, transparent 80%);
+          mask-image: linear-gradient(to right, #000 0%, transparent 80%);
+  opacity: 0.5;
+  animation: fxDots 3s linear infinite;
 }
 
-/* Respect users who prefer reduced motion: keep the colour, stop the movement */
+/* Bright line hugging the screen edge, with a light pulse running along it */
+.fx-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(var(--fx-blue), 0.5) 15%, rgba(var(--fx-blue), 0.5) 85%, transparent);
+  box-shadow: 0 0 16px 3px rgba(var(--fx-blue), 0.35);
+}
+.fx-scan {
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 4px;
+  height: 26vh;
+  background: linear-gradient(to bottom, transparent, rgba(var(--fx-blue), 1), rgba(166, 184, 255, 1), transparent);
+  box-shadow: 0 0 18px 4px rgba(var(--fx-blue), 0.7);
+  border-radius: 4px;
+  will-change: transform;
+  animation: fxScan 6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+/* Offset the right side so the two pulses don't move in lockstep */
+.fx-edge-right .fx-scan  { animation-delay: -3s; }
+.fx-edge-right .fx-orb-a { animation-delay: -7s; }
+.fx-edge-right .fx-orb-b { animation-delay: -10s; }
+
+@keyframes fxBreathe {
+  from { opacity: 0.65; }
+  to   { opacity: 1; }
+}
+@keyframes fxOrbA {
+  from { transform: translateY(-10vh); }
+  to   { transform: translateY(50vh); }
+}
+@keyframes fxOrbB {
+  from { transform: translateY(60vh); }
+  to   { transform: translateY(-15vh); }
+}
+@keyframes fxDots {
+  from { background-position: 0 0; }
+  to   { background-position: 0 -22px; }
+}
+@keyframes fxScan {
+  0%   { transform: translateY(-30vh); }
+  100% { transform: translateY(115vh); }
+}
+
+/* Phones: content fills the screen, so keep the effect subtle */
+@media (max-width: 640px) {
+  #side-fx { opacity: 0.6; }
+  .fx-dots { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .side-blob,
-  .side-blob:nth-child(n),
-  .side-shape {
+  .fx-glow, .fx-orb, .fx-dots, .fx-scan {
     animation: none;
   }
+  .fx-scan { display: none; }
 }
