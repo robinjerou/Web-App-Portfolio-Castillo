@@ -335,7 +335,8 @@ html, body {
    so it stays put (and simply spins) while the card flips */
 .flip-toggle {
   position: absolute;
-  top: 0.5rem;
+  /* top: 0.5rem; */
+  bottom: -2px;      /* aligns with the tag row */
   right: 0.5rem;
   z-index: 10;
   width: 2rem;
