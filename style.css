@@ -389,6 +389,9 @@ html, body {
   width: 100%;
 }
 
+.mascot-stage{
+  position: relative;
+}
 
 /* MASCOT CHANGE:
   Main mascot element.
@@ -600,6 +603,56 @@ html, body {
     animation: none;
   }
 }
+
+
+
+/* Sound (mute / unmute) button */
+.mascot-sound-toggle {
+  position: absolute;
+  right: -0.5rem;
+  bottom: -0.25rem;
+  z-index: 10;
+
+  width: 2.25rem;
+  height: 2.25rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9999px;
+
+  /* var(--x, fallback) works with or without dark mode variables */
+  background-color: rgb(var(--surface, 255 255 255));
+  border: 1px solid rgb(var(--line, 228 230 235));
+  color: rgb(var(--soft, 91 95 110));
+
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.mascot-sound-toggle:hover {
+  color: rgb(var(--accentText, 63 92 224));
+  border-color: rgb(var(--accentText, 63 92 224));
+}
+
+.mascot-sound-toggle svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* Show the right icon for the current state */
+.mascot-sound-toggle .icon-sound-off {
+  display: none;
+}
+
+.mascot-sound-toggle.is-muted .icon-sound-on {
+  display: none;
+}
+
+.mascot-sound-toggle.is-muted .icon-sound-off {
+  display: block;
+}
+
 
 
 /* Side bar effects */

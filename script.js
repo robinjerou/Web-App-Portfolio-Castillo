@@ -453,6 +453,118 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
     different expression.
       */
 
+
+
+    /*
+    Sound effects (Web Audio API, no audio files needed)
+    plus a mute toggle that is remembered between visits.
+  */
+
+  let audioCtx = null;
+  let soundMuted = false;
+
+  // Load the saved mute choice (wrapped in try/catch in case
+  // storage is blocked, e.g. private browsing).
+  try {
+    soundMuted = localStorage.getItem("mascotMuted") === "true";
+  } catch (e) {}
+
+  const soundToggle = document.getElementById("mascot-sound-toggle");
+
+  // Update the icon + accessible label to match the current state.
+  function syncSoundButton() {
+    if (!soundToggle) return;
+
+    soundToggle.classList.toggle("is-muted", soundMuted);
+    soundToggle.setAttribute(
+      "aria-label",
+      soundMuted ? "Unmute mascot sounds" : "Mute mascot sounds"
+    );
+  }
+
+  // Browsers keep audio "suspended" until a user gesture,
+  // so create/resume the context lazily on first click.
+  function getAudioContext() {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audioCtx = new AC();
+    }
+
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    return audioCtx;
+  }
+
+  /*
+    Play one short tone that slides from freqStart to freqEnd (Hz).
+
+      duration – length in seconds
+      type     – "sine" (soft), "triangle" (mellow), "square" (buzzy)
+      volume   – 0 to 1 (keep low!)
+      delay    – seconds to wait before playing (for multi-note sounds)
+  */
+  function playTone(freqStart, freqEnd, duration, type = "sine", volume = 0.15, delay = 0) {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const start = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freqStart, start);
+    osc.frequency.exponentialRampToValueAtTime(freqEnd, start + duration);
+
+    // Quick fade in/out so it doesn't "click" or pop
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + duration + 0.02);
+  }
+
+  // One sound per click tier, matching the expressions below.
+  function playMascotSound(count) {
+    if (soundMuted) return;
+
+    if (count === 1) {
+      // soft "boop"
+      playTone(520, 780, 0.12, "sine");
+
+    } else if (count === 2) {
+      // two-note chirp
+      playTone(600, 900, 0.10, "triangle");
+      playTone(900, 1200, 0.12, "triangle", 0.15, 0.09);
+
+    } else {
+      // silly "bonk" for spam-clicking
+      playTone(300, 120, 0.25, "square", 0.08);
+    }
+  }
+
+  // Mute / unmute button
+  if (soundToggle) {
+    soundToggle.addEventListener("click", function () {
+
+      soundMuted = !soundMuted;
+
+      try {
+        localStorage.setItem("mascotMuted", String(soundMuted));
+      } catch (e) {}
+
+      syncSoundButton();
+
+      // Tiny blip when turning sound back on, so you can hear it worked
+      if (!soundMuted) playTone(700, 1000, 0.08, "sine", 0.1);
+    });
+  }
+
+  syncSoundButton();
+
   function mascotClicked() {
 
     /*
@@ -490,6 +602,9 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
     clickResetTimeout = setTimeout(() => {
       clickCount = 0;
     }, 1200);
+
+
+    playMascotSound(clickCount);
 
 
     /*
