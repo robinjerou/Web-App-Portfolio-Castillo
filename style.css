@@ -454,6 +454,7 @@ html, body {
 */
 .mascot-direction {
   background-image: var(--mascot-directions);
+  opacity: 1;
 }
 
 
@@ -471,7 +472,20 @@ html, body {
 
   opacity: 0;
 
-  transition: opacity 80ms ease;
+  transition: none; /* no transition for the reaction sprite */
+}
+
+/*
+  When reacting:
+  hide the direction character completely
+  and show the expression character.
+*/
+.portfolio-mascot.mascot-reacting .mascot-direction {
+  opacity: 0;
+}
+
+.portfolio-mascot.mascot-reacting .mascot-reaction {
+  opacity: 1;
 }
 
 

@@ -429,12 +429,15 @@ document.querySelectorAll('.flip-preview-img').forEach((img) => {
     clearTimeout(reactionTimeout);
 
     reactionSprite.style.backgroundPosition = position;
-    reactionSprite.style.opacity = "1";
+  
+
+    mascot.classList.add("mascot-reacting");
 
 
     reactionTimeout = setTimeout(() => {
 
-      reactionSprite.style.opacity = "0";
+      // Switch back to direction sprite
+      mascot.classList.remove("mascot-reacting");
 
     }, duration);
   }
