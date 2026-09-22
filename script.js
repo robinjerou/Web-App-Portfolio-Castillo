@@ -983,3 +983,29 @@ const backToTop = document.getElementById("backToTop");
   start();
 
 })();
+
+
+//Last updated date in footer function
+(function () {
+  var el = document.getElementById('last-updated');
+  if (!el) return;
+
+  var owner = 'robinjerou';
+  var repo = 'robinjerou.github.io'; // change to your actual repo name if different
+
+  fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?per_page=1')
+    .then(function (res) {
+      if (!res.ok) throw new Error('GitHub API error');
+      return res.json();
+    })
+    .then(function (data) {
+      var dateStr = data[0].commit.committer.date;
+      var date = new Date(dateStr);
+      el.textContent = date.toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    })
+    .catch(function () {
+      el.textContent = 'recently';
+    });
+})();
