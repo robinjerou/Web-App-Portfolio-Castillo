@@ -117,6 +117,188 @@ button:focus-visible {
 }
 
 
+/* ============================================================
+   About / Achievements / Certifications carousel
+   One panel, three slides, switched with a fast "Flash"-style
+   blur-streak transition (speedster dash out, dash back in).
+   ============================================================ */
+.about-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+ 
+.about-track {
+  position: relative;
+}
+ 
+.about-slide {
+  display: none;
+}
+.about-slide.active {
+  display: block;
+}
+ 
+/* Outgoing slide: rockets off-screen with a motion blur */
+.about-slide.flash-out-next {
+  animation: aboutFlashOutLeft 0.16s cubic-bezier(.55, 0, 1, .45) forwards;
+}
+.about-slide.flash-out-prev {
+  animation: aboutFlashOutRight 0.16s cubic-bezier(.55, 0, 1, .45) forwards;
+}
+ 
+/* Incoming slide: streaks in from the opposite side and snaps into focus */
+.about-slide.flash-in-next {
+  animation: aboutFlashInFromRight 0.24s cubic-bezier(.15, .85, .3, 1) forwards;
+}
+.about-slide.flash-in-prev {
+  animation: aboutFlashInFromLeft 0.24s cubic-bezier(.15, .85, .3, 1) forwards;
+}
+ 
+@keyframes aboutFlashOutLeft {
+  0%   { transform: translateX(0); opacity: 1; filter: blur(0); }
+  100% { transform: translateX(-48px); opacity: 0; filter: blur(9px); }
+}
+@keyframes aboutFlashOutRight {
+  0%   { transform: translateX(0); opacity: 1; filter: blur(0); }
+  100% { transform: translateX(48px); opacity: 0; filter: blur(9px); }
+}
+@keyframes aboutFlashInFromRight {
+  0%   { transform: translateX(56px); opacity: 0; filter: blur(10px); }
+  40%  { opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; filter: blur(0); }
+}
+@keyframes aboutFlashInFromLeft {
+  0%   { transform: translateX(-56px); opacity: 0; filter: blur(10px); }
+  40%  { opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; filter: blur(0); }
+}
+ 
+/* Lightning-streak overlay that sweeps across the panel on every switch */
+.flash-streak {
+  position: absolute;
+  top: 0;
+  left: -35%;
+  width: 35%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(3px);
+  background: linear-gradient(
+    100deg,
+    rgb(var(--accent) / 0) 0%,
+    rgb(var(--accent) / 0.35) 35%,
+    rgb(var(--accent) / 0.9) 50%,
+    rgb(var(--accent) / 0.35) 65%,
+    rgb(var(--accent) / 0) 100%
+  );
+}
+.flash-streak.run-next {
+  animation: aboutStreakSweepRight 0.4s cubic-bezier(.2, .75, .25, 1);
+}
+.flash-streak.run-prev {
+  animation: aboutStreakSweepLeft 0.4s cubic-bezier(.2, .75, .25, 1);
+}
+@keyframes aboutStreakSweepRight {
+  0%   { left: -35%; opacity: 0; }
+  12%  { opacity: 1; }
+  55%  { opacity: 1; }
+  100% { left: 105%; opacity: 0; }
+}
+@keyframes aboutStreakSweepLeft {
+  0%   { left: 105%; opacity: 0; }
+  12%  { opacity: 1; }
+  55%  { opacity: 1; }
+  100% { left: -35%; opacity: 0; }
+}
+ 
+/* Prev/next circular arrow buttons (match the theme-toggle button style) */
+.about-arrow {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background-color: rgb(var(--surface));
+  border: 1px solid rgb(var(--line));
+  color: rgb(var(--soft));
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+.about-arrow:hover {
+  color: #3F5CE0;
+  border-color: #3F5CE0;
+}
+.about-arrow:active {
+  transform: scale(0.9);
+}
+.about-arrow svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+ 
+/* Progress dots */
+.about-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background-color: rgb(var(--line));
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.about-dot:hover {
+  background-color: rgb(var(--accent));
+}
+.about-dot.active {
+  background-color: rgb(var(--accentText));
+  transform: scale(1.35);
+}
+ 
+/* Icon next to each achievement / certification entry */
+.achieve-icon {
+  font-size: 1.1rem;
+  line-height: 1.5rem;
+  flex-shrink: 0;
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+  .about-slide,
+  .flash-streak {
+    animation: none !important;
+  }
+}
+ 
+/* Divider lines between project rows */
+.project-row {
+  border-top: 1px solid #E4E6EB;
+}
+.project-row:last-child {
+  border-bottom: 1px solid #E4E6EB;
+}
+ 
+/* Small tech-stack tags under each project */
+.tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #E4E6EB;
+  color: #5B5F6E;
+  background-color: #FFFFFF;
+}
+ 
+/* Underline style for inline text links */
+.link-underline {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+
+
+
 
 /* Dark mode toggle button in the header */
 .theme-toggle {
