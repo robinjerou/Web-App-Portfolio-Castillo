@@ -160,23 +160,100 @@
     <section id="about" class="py-16 border-t border-line grid sm:grid-cols-[120px_1fr] gap-6 sm:gap-10">
       <p class="text-sm text-soft pt-1 font-medium">About</p>
       <div class="max-w-xl">
-        <p class="leading-relaxed mb-4 text-ink">
-          I graduated with a degree in Information Technology with Specialization in Artificial Intelligence. Most of the knoweldge or experience in technologies are what I picked up from schoolworks and majorly completing the capstone project, wherein I attained the ability and mindset to work in a group and individual basis.
+        <div class="about-carousel relative">
+          <div class="flash-streak" aria-hidden="true"></div>
+          <div id="about-track" class="about-track">
+            <div class="about-slide active" data-slide="0" data-label="About">
+              
+              <p class="leading-relaxed mb-4 text-ink">
+                I graduated with a degree in Information Technology with Specialization in Artificial Intelligence. Most of the knoweldge or experience in technologies are what I picked up from schoolworks and majorly completing the capstone project, wherein I attained the ability and mindset to work in a group and individual basis.
           
-        </p>
-        <p class="leading-relaxed mb-4 text-ink">
-          I also developed a habit of being meticulous and started with applying the SDLC cycle in my own class projects and target into actually understanding the process/phasses effectively. 
-        </p>
+              </p>
+              <p class="leading-relaxed mb-4 text-ink">
+                I also developed a habit of being meticulous and started with applying the SDLC cycle in my own class projects and target into actually understanding the process/phasses effectively. 
+              </p>
 
-        <p class="leading-relaxed mb-4 text-ink">
-          During my practicum period of 5 months, I gained experience in a role as a QA intern at 1902 Software Development Corporation. I handled automation testing for the WriteText.AI plugin in WordPress WooCommerce in both Staging and Live Production environments.
-        </p>
+              <p class="leading-relaxed mb-4 text-ink">
+                During my practicum period of 5 months, I gained experience in a role as a QA intern at 1902 Software Development Corporation. I handled automation testing for the WriteText.AI plugin in WordPress WooCommerce in both Staging and Live Production environments.
+              </p>
 
-        <p class="leading-relaxed mb-4 text-ink">
-          I am always looking for opportunities to learn and grow in the field of IT.
-        </p>
+              <p class="leading-relaxed mb-4 text-ink">
+                I am always looking for opportunities to learn and grow in the field of IT.
+              </p>
+            </div>
+          
+    
+
+
+    <!-- ACHIEVEMENTS section -->
+            <div class="about-slide" data-slide="1" data-label="Achievements">
+              <ul class="space-y-5">
+                <li class="flex gap-3">
+                  <span class="achieve-icon" aria-hidden="true"></span>
+                  <div>
+                    <p class="text-ink font-semibold leading-snug">Dean Lister's Award</p>
+                    <p class="text-soft text-sm leading-relaxed mt-1">(2021, 2022, 2023, 2024) <span class="text-xs"></span></p>
+                  </div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="achieve-icon" aria-hidden="true"></span>
+                  <div>
+                    <p class="text-ink font-semibold leading-snug">Certificate in Information and Database Management</p>
+                    <p class="text-soft text-sm leading-relaxed mt-1">OEB Award <span class="text-xs">(2026)</span></p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+    
+    
+    <!-- CERTIFICATIONS section -->
+            <!-- Replace the sample entries below with your own certifications. -->
+            <div class="about-slide" data-slide="2" data-label="Certifications">
+              <ul class="space-y-5">
+                <li class="flex gap-3">
+                  <span class="achieve-icon" aria-hidden="true"></span>
+                  <div>
+                    <p class="text-ink font-semibold leading-snug">	Microsoft Certified AI Fundamentals</p>
+                    <p class="text-soft text-sm leading-relaxed mt-1">Issued by Southville (2026)</p>
+                  </div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="achieve-icon" aria-hidden="true"></span>
+                  <div>
+                    <p class="text-ink font-semibold leading-snug">Microsoft Certified Azure Fundamentals</p>
+                    <p class="text-soft text-sm leading-relaxed mt-1">Issued by Southville (2025)</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Arrow controls + progress dots -->
+        <div class="flex items-center gap-4 mt-6">
+          <button id="about-prev" type="button" class="about-arrow" aria-label="Previous section">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+
+          <div class="flex gap-2" role="tablist" aria-label="About panel sections">
+            <button type="button" class="about-dot active" data-index="0" role="tab" aria-selected="true" aria-label="Show About"></button>
+            <button type="button" class="about-dot" data-index="1" role="tab" aria-selected="false" aria-label="Show Achievements"></button>
+            <button type="button" class="about-dot" data-index="2" role="tab" aria-selected="false" aria-label="Show Certifications"></button>
+          </div>
+
+          <button id="about-next" type="button" class="about-arrow" aria-label="Next section">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
+
 
     <!-- MASCOT section -->
 
@@ -460,7 +537,7 @@
       </div>
     </section>
 
-    <!-- ============ SKILLS ============ -->
+    <!-- SKILLS section -->
     <section id="skills" class="py-16 border-t border-line grid sm:grid-cols-[120px_1fr] gap-6 sm:gap-10">
       <p class="text-sm text-soft pt-1 font-medium">Skills</p>
       <div class="grid sm:grid-cols-2 gap-8 max-w-xl">
@@ -527,6 +604,8 @@
         <!--<a href="robinjerouecastillo@gmail.com" class="link-underline text-ink hover:text-accentText">Email</a>-->
         <!--<a href="09621792918" class="link-underline text-ink hover:text-accentText">Contact Number</a>-->
         <a href="https://github.com/robinjerou" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText">GitHub</a>
+        <a href="https://robincastillo.jobs180.com/" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText">Jobs180</a>
+
       </div>
     </section>
 
