@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Castillo Portfolio</title>
 
+<script>
+  (function () {
+    var stored = localStorage.getItem('theme');
+    var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,13 +26,20 @@
     theme: {
       extend: {
         colors: {
-          bg: '#F6F7F9',
-          surface: '#FFFFFF',
-          ink: '#171923',
-          soft: '#5B5F6E',
-          line: '#E4E6EB',
-          accent: '#5170FF',
-          accentText: '#3F5CE0',
+          // bg: '#F6F7F9',
+          // surface: '#FFFFFF',
+          // ink: '#171923',
+          // soft: '#5B5F6E',
+          // line: '#E4E6EB',
+          // accent: '#5170FF',
+          // accentText: '#3F5CE0',
+          bg: 'rgb(var(--bg) / <alpha-value>)',
+          surface: 'rgb(var(--surface) / <alpha-value>)',
+          ink: 'rgb(var(--ink) / <alpha-value>)',
+          soft: 'rgb(var(--soft) / <alpha-value>)',
+          line: 'rgb(var(--line) / <alpha-value>)',
+          accent: 'rgb(var(--accent) / <alpha-value>)',
+          accentText: 'rgb(var(--accentText) / <alpha-value>)',
         },
         fontFamily: {
           sans: ['"Inter"', 'sans-serif'],
@@ -75,6 +90,27 @@
         <a href="#skills" class="nav-link">Skills</a>
         <a href="#contact" class="nav-link">Contact</a>
       </nav>
+
+
+      <!-- Dark mode toggle -->
+      <button id="theme-toggle" type="button" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <line x1="12" y1="2" x2="12" y2="4"></line>
+            <line x1="12" y1="20" x2="12" y2="22"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="2" y1="12" x2="4" y2="12"></line>
+            <line x1="20" y1="12" x2="22" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+
 
       <!-- Mobile menu button -->
       <button id="menu-button" class="sm:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle menu">

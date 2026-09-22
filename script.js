@@ -1,4 +1,51 @@
-// ============================================
+// Dark mode feature
+const themeToggle = document.getElementById('theme-toggle');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+
+  if (themeToggle) {
+    const isDark = theme === 'dark';
+    themeToggle.setAttribute('aria-pressed', String(isDark));
+    themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+if (themeToggle) {
+  // Sync the button's state with whatever the <head> script already set,
+  // then let clicks flip it from there.
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  });
+
+  // If the visitor hasn't made an explicit choice yet, keep following
+  // their OS-level light/dark setting live.
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme-explicit')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+ 
+  // Mark the choice as explicit once the visitor actually clicks the button,
+  // so it stops following OS changes after that.
+  themeToggle.addEventListener('click', () => {
+    localStorage.setItem('theme-explicit', 'true');
+  });
+}
+
+
+
+
+
+
+
+
+
+
 // Mobile navigation menu toggle
 // Opens/closes the nav links on small screens
 // where there isn't room for the full menu bar.
