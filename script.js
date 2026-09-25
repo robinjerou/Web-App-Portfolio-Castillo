@@ -238,6 +238,91 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+//open new tab function
+(function initLinkConfirm() {
+  const modal = document.getElementById('link-modal');
+  if (!modal) return;
+
+  const panel = modal.querySelector('.link-modal-panel');
+  const targetLabel = document.getElementById('link-modal-target');
+  const cancelBtn = document.getElementById('link-modal-cancel');
+  const confirmBtn = document.getElementById('link-modal-confirm');
+
+  let pendingUrl = null;
+
+  function labelFor(url) {
+    try {
+      const parsed = new URL(url, window.location.href);
+      if (parsed.origin === window.location.origin) {
+        // Same-site file (e.g. résumé) — show the filename, not the domain.
+        const file = decodeURIComponent(parsed.pathname.split('/').pop() || '');
+        return file || parsed.hostname;
+      }
+      return parsed.hostname.replace(/^www\./, '');
+    } catch (e) {
+      return url;
+    }
+  }
+
+  function openLinkModal(url) {
+    pendingUrl = url;
+    targetLabel.textContent = labelFor(url);
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+
+    // Reflow before animating in, same trick as the video modal.
+    void modal.offsetWidth;
+    requestAnimationFrame(() => modal.classList.add('modal-open'));
+
+    confirmBtn.focus();
+  }
+
+  function closeLinkModal() {
+    modal.classList.remove('modal-open');
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+      pendingUrl = null;
+    };
+
+    panel.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 350); // fallback in case transitionend doesn't fire
+  }
+
+  document.querySelectorAll('a.link-confirm').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLinkModal(link.href);
+    });
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    if (pendingUrl) window.open(pendingUrl, '_blank', 'noopener,noreferrer');
+    closeLinkModal();
+  });
+
+  cancelBtn.addEventListener('click', closeLinkModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeLinkModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeLinkModal();
+    }
+  });
+})();
+
+
+
 // scroll progress bar function
 window.addEventListener("scroll", () => {
   const scrollTop = window.scrollY;

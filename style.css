@@ -125,6 +125,36 @@ button:focus-visible {
 
 
 
+/* Open new tab */
+#link-modal {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#link-modal.modal-open {
+  opacity: 1;
+}
+
+.link-modal-panel {
+  transform: scale(0.92) translateY(10px);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+
+#link-modal.modal-open .link-modal-panel {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #link-modal,
+  .link-modal-panel {
+    transition: none;
+  }
+}
+
+
 
 /* Divider lines between project rows */
 .project-row {

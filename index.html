@@ -755,7 +755,7 @@
         <!--<a href="robinjerouecastillo@gmail.com" class="link-underline text-ink hover:text-accentText">Email</a>-->
         <!--<a href="09621792918" class="link-underline text-ink hover:text-accentText">Contact Number</a>-->
         <a href="https://github.com/robinjerou" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText">GitHub</a>
-        <a href="https://robincastillo.jobs180.com/" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText">Jobs180</a>
+        <a href="https://robincastillo.jobs180.com/" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText link-confirm">Jobs180</a>
 
       </div>
     </section>
@@ -787,6 +787,18 @@
           <source src="" type="video/mp4">
           Your browser doesn't support embedded video.
         </video>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="link-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 px-4">
+    <div class="link-modal-panel relative w-full max-w-sm bg-surface border border-line rounded-lg p-6 text-center shadow-xl">
+      <p class="text-sm text-soft mb-1">You're about to open</p>
+      <p id="link-modal-target" class="font-semibold text-lg text-ink mb-6 break-all"></p>
+      <div class="flex gap-3 justify-center">
+        <button id="link-modal-cancel" type="button" class="px-4 py-2 rounded-md text-sm font-medium border border-line text-ink hover:bg-bg transition-colors">Stay here</button>
+        <button id="link-modal-confirm" type="button" class="px-4 py-2 rounded-md text-sm font-semibold bg-accentText text-white hover:bg-accent transition-colors">Open in new tab</button>
       </div>
     </div>
   </div>
