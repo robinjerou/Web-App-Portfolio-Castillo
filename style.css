@@ -854,6 +854,58 @@ html, body {
 }
 
 
+/* Mascot label orbit */
+.mascot-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 440px;
+  height: 440px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: none;
+}
+ 
+.mascot-orbit-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+  animation: mascot-orbit-spin 22s linear infinite;
+}
+ 
+.mascot-orbit-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  fill: #3F5CE0;
+  filter: drop-shadow(0 0 3px rgba(81, 112, 255, 0.35));
+}
+ 
+@keyframes mascot-orbit-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); } /* clockwise */
+}
+ 
+@media (hover: hover) and (pointer: fine) {
+  .mascot-orbit {
+    display: block;
+  }
+}
+ 
+@media (max-width: 640px) {
+  .mascot-orbit {
+    width: 260px;
+    height: 260px;
+  }
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+  .mascot-orbit-svg {
+    animation: none;
+  }
+}
+
 
 /* Sound (mute / unmute) button */
 .mascot-sound-toggle {

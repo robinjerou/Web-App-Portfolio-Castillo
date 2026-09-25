@@ -1014,7 +1014,7 @@ const backToTop = document.getElementById("backToTop");
 
 // About / Achievements / Certifications carousel
 // Arrow buttons + dots switch between the three slides using a fast
-// "Flash"-style transition: the current slide blur-dashes off in the
+// "Flash" style transition: the current slide blur-dashes off in the
 // direction of travel while a lightning streak sweeps the panel, then
 // the next slide dashes in from the opposite side.
 (function initAboutCarousel() {
