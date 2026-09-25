@@ -117,28 +117,28 @@ button:focus-visible {
 }
 
 
-/* ============================================================
-   About / Achievements / Certifications carousel
-   One panel, three slides, switched with a fast "Flash"-style
-   blur-streak transition (speedster dash out, dash back in).
-   ============================================================ */
+/* 
+  About / Achievements / Certifications carousel
+  One panel, three slides, switched with a fast "Flash"-style
+  blur-streak transition (speedster dash out, dash back in).
+    */
 .about-carousel {
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem;
 }
- 
+
 .about-track {
   position: relative;
 }
- 
+
 .about-slide {
   display: none;
 }
 .about-slide.active {
   display: block;
 }
- 
+
 /* Outgoing slide: rockets off-screen with a motion blur */
 .about-slide.flash-out-next {
   animation: aboutFlashOutLeft 0.16s cubic-bezier(.55, 0, 1, .45) forwards;
@@ -146,7 +146,7 @@ button:focus-visible {
 .about-slide.flash-out-prev {
   animation: aboutFlashOutRight 0.16s cubic-bezier(.55, 0, 1, .45) forwards;
 }
- 
+
 /* Incoming slide: streaks in from the opposite side and snaps into focus */
 .about-slide.flash-in-next {
   animation: aboutFlashInFromRight 0.24s cubic-bezier(.15, .85, .3, 1) forwards;
@@ -154,7 +154,7 @@ button:focus-visible {
 .about-slide.flash-in-prev {
   animation: aboutFlashInFromLeft 0.24s cubic-bezier(.15, .85, .3, 1) forwards;
 }
- 
+
 @keyframes aboutFlashOutLeft {
   0%   { transform: translateX(0); opacity: 1; filter: blur(0); }
   100% { transform: translateX(-48px); opacity: 0; filter: blur(9px); }
@@ -173,7 +173,7 @@ button:focus-visible {
   40%  { opacity: 1; }
   100% { transform: translateX(0); opacity: 1; filter: blur(0); }
 }
- 
+
 /* Lightning-streak overlay that sweeps across the panel on every switch */
 .flash-streak {
   position: absolute;
@@ -212,7 +212,7 @@ button:focus-visible {
   55%  { opacity: 1; }
   100% { left: -35%; opacity: 0; }
 }
- 
+
 /* Prev/next circular arrow buttons (match the theme-toggle button style) */
 .about-arrow {
   width: 2.25rem;
@@ -238,7 +238,7 @@ button:focus-visible {
   width: 1.05rem;
   height: 1.05rem;
 }
- 
+
 /* Progress dots */
 .about-dot {
   width: 0.5rem;
@@ -257,21 +257,21 @@ button:focus-visible {
   background-color: rgb(var(--accentText));
   transform: scale(1.35);
 }
- 
+
 /* Icon next to each achievement / certification entry */
 .achieve-icon {
   font-size: 1.1rem;
   line-height: 1.5rem;
   flex-shrink: 0;
 }
- 
+
 @media (prefers-reduced-motion: reduce) {
   .about-slide,
   .flash-streak {
     animation: none !important;
   }
 }
- 
+
 /* Divider lines between project rows */
 .project-row {
   border-top: 1px solid #E4E6EB;
@@ -279,7 +279,7 @@ button:focus-visible {
 .project-row:last-child {
   border-bottom: 1px solid #E4E6EB;
 }
- 
+
 /* Small tech-stack tags under each project */
 .tag {
   font-size: 0.75rem;
@@ -865,7 +865,7 @@ html, body {
   pointer-events: none;
   display: none;
 }
- 
+
 .mascot-orbit-svg {
   display: block;
   width: 100%;
@@ -873,7 +873,7 @@ html, body {
   transform-origin: 50% 50%;
   animation: mascot-orbit-spin 22s linear infinite;
 }
- 
+
 .mascot-orbit-text {
   font-size: 15px;
   font-weight: 600;
@@ -881,28 +881,99 @@ html, body {
   fill: #3F5CE0;
   filter: drop-shadow(0 0 3px rgba(81, 112, 255, 0.35));
 }
- 
+
 @keyframes mascot-orbit-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); } /* clockwise */
 }
- 
+
 @media (hover: hover) and (pointer: fine) {
   .mascot-orbit {
     display: block;
   }
 }
- 
+
 @media (max-width: 640px) {
   .mascot-orbit {
     width: 260px;
     height: 260px;
   }
 }
- 
+
 @media (prefers-reduced-motion: reduce) {
   .mascot-orbit-svg {
     animation: none;
+  }
+}
+
+/* last update tooltip */
+.last-updated-trigger {
+  border-bottom: 1px dashed currentColor;
+  cursor: help;
+}
+
+.last-updated-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  min-width: 170px;
+  max-width: 240px;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  text-align: left;
+
+  background-color: rgb(var(--surface));
+  border: 1px solid rgb(var(--line));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 30;
+}
+
+.last-updated-tooltip.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.last-updated-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgb(var(--line));
+}
+
+.last-updated-tooltip-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgb(var(--ink));
+  margin: 0 0 0.35rem;
+}
+
+.last-updated-tooltip ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.last-updated-tooltip li {
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: rgb(var(--soft));
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .last-updated-tooltip {
+    transition: none;
   }
 }
 

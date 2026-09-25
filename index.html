@@ -727,8 +727,20 @@
 
   </main>
 
-  <footer class="max-w-3xl mx-auto px-6 py-8 border-t border-line text-xs text-soft">
+  <!-- <footer class="max-w-3xl mx-auto px-6 py-8 border-t border-line text-xs text-soft">
     © 2026 Robin Jerou E. Castillo Portfolio - Last updated: <span id="last-updated"></span>
+  </footer> -->
+
+
+  <footer class="max-w-3xl mx-auto px-6 py-8 border-t border-line text-xs text-soft">
+    © 2026 Robin Jerou E. Castillo Portfolio - Last updated:
+    <span class="relative inline-block">
+      <span id="last-updated" class="last-updated-trigger" tabindex="0" role="button" aria-describedby="last-updated-tooltip"></span>
+      <div id="last-updated-tooltip" class="last-updated-tooltip" role="tooltip">
+        <p class="last-updated-tooltip-title">Recent updates</p>
+        <ul id="last-updated-list"></ul>
+      </div>
+    </span>
   </footer>
 
   <!-- All "Recorded Demo" links across every project reuse this same modal. -->

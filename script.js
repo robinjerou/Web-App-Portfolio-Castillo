@@ -957,7 +957,7 @@ const backToTop = document.getElementById("backToTop");
     lastTime = performance.now();
     rafId = requestAnimationFrame(tick);
   }
- 
+
   function stop() {
     if (rafId !== null) cancelAnimationFrame(rafId);
     rafId = null;
@@ -986,31 +986,89 @@ const backToTop = document.getElementById("backToTop");
 
 
 //Last updated date in footer function
+// (function () {
+//   var el = document.getElementById('last-updated');
+//   if (!el) return;
+
+//   var owner = 'robinjerou';
+//   var repo = 'Web-App-Portfolio-Castillo'; // change to the actual repo name if different
+
+//   fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?per_page=1')
+//     .then(function (res) {
+//       if (!res.ok) throw new Error('GitHub API error');
+//       return res.json();
+//     })
+//     .then(function (data) {
+//       var dateStr = data[0].commit.committer.date;
+//       var date = new Date(dateStr);
+//       el.textContent = date.toLocaleDateString('en-US', {
+//         year: 'numeric', month: 'long', day: 'numeric'
+//       });
+//     })
+//     .catch(function () {
+//       el.textContent = 'recently';
+//     });
+// })();
+
 (function () {
-  var el = document.getElementById('last-updated');
-  if (!el) return;
+  var trigger = document.getElementById('last-updated');
+  var tooltip = document.getElementById('last-updated-tooltip');
+  var list = document.getElementById('last-updated-list');
+  if (!trigger || !tooltip || !list) return;
 
   var owner = 'robinjerou';
   var repo = 'Web-App-Portfolio-Castillo'; // change to the actual repo name if different
+  var HISTORY_COUNT = 5; // how many recent commit dates to list in the tooltip
 
-  fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?per_page=1')
+  function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+
+  fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?per_page=' + HISTORY_COUNT)
     .then(function (res) {
       if (!res.ok) throw new Error('GitHub API error');
       return res.json();
     })
     .then(function (data) {
-      var dateStr = data[0].commit.committer.date;
-      var date = new Date(dateStr);
-      el.textContent = date.toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric'
+      if (!data.length) throw new Error('No commits found');
+
+      trigger.textContent = formatDate(data[0].commit.committer.date);
+
+      list.innerHTML = '';
+      data.forEach(function (commitEntry) {
+        var li = document.createElement('li');
+        li.textContent = formatDate(commitEntry.commit.committer.date);
+        list.appendChild(li);
       });
     })
     .catch(function () {
-      el.textContent = 'recently';
+      trigger.textContent = 'recently';
+      list.innerHTML = '<li>No update history available.</li>';
     });
+
+  // Show on hover (desktop) and toggle on click/tap (works everywhere,
+  // including touch devices that can't hover)
+  function showTooltip() { tooltip.classList.add('show'); }
+  function hideTooltip() { tooltip.classList.remove('show'); }
+
+  trigger.addEventListener('mouseenter', showTooltip);
+  trigger.addEventListener('mouseleave', hideTooltip);
+  trigger.addEventListener('focus', showTooltip);
+  trigger.addEventListener('blur', hideTooltip);
+
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    tooltip.classList.toggle('show');
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!tooltip.contains(e.target) && e.target !== trigger) {
+      hideTooltip();
+    }
+  });
 })();
-
-
 
 // About / Achievements / Certifications carousel
 // Arrow buttons + dots switch between the three slides using a fast
@@ -1020,7 +1078,7 @@ const backToTop = document.getElementById("backToTop");
 (function initAboutCarousel() {
   const track = document.getElementById('about-track');
   if (!track) return;
- 
+
   const slides = Array.from(track.querySelectorAll('.about-slide'));
   const dots = Array.from(document.querySelectorAll('.about-dot'));
   const prevBtn = document.getElementById('about-prev');
@@ -1028,10 +1086,10 @@ const backToTop = document.getElementById("backToTop");
   const label = document.getElementById('about-panel-label');
   const streak = document.querySelector('.about-carousel .flash-streak');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
- 
+
   let current = Math.max(0, slides.findIndex((s) => s.classList.contains('active')));
   let animating = false;
- 
+
   function setActiveDot(index) {
     dots.forEach((dot, i) => {
       const isActive = i === index;
@@ -1039,41 +1097,41 @@ const backToTop = document.getElementById("backToTop");
       dot.setAttribute('aria-selected', String(isActive));
     });
   }
- 
+
   function finish(index) {
     current = index;
     setActiveDot(index);
     if (label) label.textContent = slides[index].dataset.label || '';
     animating = false;
   }
- 
+
   function goTo(index, direction) {
     if (animating || index === current || !slides[index]) return;
     animating = true;
- 
+
     const outgoing = slides[current];
     const incoming = slides[index];
     const outClass = direction === 'next' ? 'flash-out-next' : 'flash-out-prev';
     const inClass = direction === 'next' ? 'flash-in-next' : 'flash-in-prev';
- 
+
     if (streak) {
       streak.classList.remove('run-next', 'run-prev');
       void streak.offsetWidth; // restart the sweep animation if triggered again quickly
       streak.classList.add(direction === 'next' ? 'run-next' : 'run-prev');
     }
- 
+
     if (reducedMotion.matches) {
       outgoing.classList.remove('active');
       incoming.classList.add('active');
       finish(index);
       return;
     }
- 
+
     outgoing.classList.add(outClass);
     outgoing.addEventListener('animationend', function onOut() {
       outgoing.removeEventListener('animationend', onOut);
       outgoing.classList.remove('active', outClass);
- 
+
       incoming.classList.add('active', inClass);
       incoming.addEventListener('animationend', function onIn() {
         incoming.removeEventListener('animationend', onIn);
@@ -1082,16 +1140,16 @@ const backToTop = document.getElementById("backToTop");
       }, { once: true });
     }, { once: true });
   }
- 
+
   function step(delta) {
     const total = slides.length;
     const nextIndex = (current + delta + total) % total;
     goTo(nextIndex, delta > 0 ? 'next' : 'prev');
   }
- 
+
   if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
   if (nextBtn) nextBtn.addEventListener('click', () => step(1));
- 
+
   dots.forEach((dot) => {
     dot.addEventListener('click', () => {
       const target = Number(dot.dataset.index);
@@ -1099,7 +1157,7 @@ const backToTop = document.getElementById("backToTop");
       goTo(target, target > current ? 'next' : 'prev');
     });
   });
- 
+
   // Left/right arrow key support while the panel has focus
   const carousel = document.querySelector('.about-carousel');
   if (carousel) {
