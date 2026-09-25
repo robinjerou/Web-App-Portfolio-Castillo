@@ -176,22 +176,47 @@ const modalPlayer = document.getElementById('video-modal-player');
 const modalSource = modalPlayer.querySelector('source');
 const modalClose = document.getElementById('video-modal-close');
 
+const modalPanel = modal.querySelector('.video-modal-panel');
+
 function openVideoModal(videoSrc) {
   modalSource.src = videoSrc;
   modalPlayer.load();   // tells the browser to pick up the new source
-  modalPlayer.play();
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
+
+  // Force a reflow so the browser registers the starting (closed) state
+  // before we add modal-open — otherwise it jumps straight to open
+  // instead of transitioning smoothly, like an app launching in.
+  void modal.offsetWidth;
+
+  requestAnimationFrame(() => {
+    modal.classList.add('modal-open');
+  });
+
+  modalPlayer.play();
 }
 
 function closeVideoModal() {
+  modal.classList.remove('modal-open');
   modalPlayer.pause();
-  modalSource.src = '';
-  modalPlayer.load();
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-  document.body.style.overflow = '';
+
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    modalSource.src = '';
+    modalPlayer.load();
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  };
+
+  // Wait for the closing animation to finish before actually hiding it,
+  // with a fallback timeout in case the transition never fires.
+  modalPanel.addEventListener('transitionend', finish, { once: true });
+  setTimeout(finish, 400);
 }
 
 document.querySelectorAll('.video-trigger').forEach((link) => {

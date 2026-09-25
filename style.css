@@ -92,6 +92,40 @@ button:focus-visible {
   }
 }
 
+
+
+/* Video demo modal — smooth "app opening" transition */
+#video-modal {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+#video-modal.modal-open {
+  opacity: 1;
+}
+
+.video-modal-panel {
+  transform: scale(0.88) translateY(18px);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  will-change: transform, opacity;
+}
+
+#video-modal.modal-open .video-modal-panel {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #video-modal,
+  .video-modal-panel {
+    transition: none;
+  }
+}
+
+
+
+
 /* Divider lines between project rows */
 .project-row {
   border-top: 1px solid #E4E6EB;
@@ -517,23 +551,25 @@ html, body {
 
 
 /* Back to Top button */
-#backToTop {
+[data-theme="dark"] #backToTop {
   background-color: rgb(var(--accent));
   color: white;
   border: 1px solid rgb(var(--accent));
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   transition: background-color 0.2s ease,
               border-color 0.2s ease,
               transform 0.2s ease,
               box-shadow 0.2s ease;
 }
 
-#backToTop:hover {
+[data-theme="dark"] #backToTop:hover {
   background-color: rgb(var(--accentText));
   border-color: rgb(var(--accentText));
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
+
+
 
 
 .flip-card {
