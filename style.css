@@ -220,22 +220,22 @@ button:focus-visible {
 }
 
 @keyframes aboutFlashOutLeft {
-  0%   { transform: translateX(0); opacity: 1; filter: blur(0); }
-  100% { transform: translateX(-48px); opacity: 0; filter: blur(9px); }
+  0%   { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-48px); opacity: 0; }
 }
 @keyframes aboutFlashOutRight {
-  0%   { transform: translateX(0); opacity: 1; filter: blur(0); }
-  100% { transform: translateX(48px); opacity: 0; filter: blur(9px); }
+  0%   { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(48px); opacity: 0; }
 }
 @keyframes aboutFlashInFromRight {
-  0%   { transform: translateX(56px); opacity: 0; filter: blur(10px); }
+  0%   { transform: translateX(56px); opacity: 0; }
   40%  { opacity: 1; }
-  100% { transform: translateX(0); opacity: 1; filter: blur(0); }
+  100% { transform: translateX(0); opacity: 1; }
 }
 @keyframes aboutFlashInFromLeft {
-  0%   { transform: translateX(-56px); opacity: 0; filter: blur(10px); }
+  0%   { transform: translateX(-56px); opacity: 0; }
   40%  { opacity: 1; }
-  100% { transform: translateX(0); opacity: 1; filter: blur(0); }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
 /* Lightning-streak overlay that sweeps across the panel on every switch */
