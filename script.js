@@ -1189,6 +1189,9 @@ const backToTop = document.getElementById("backToTop");
   const track = document.getElementById('about-track');
   if (!track) return;
 
+  const carousel = track.closest('.about-carousel');
+
+  
   const slides = Array.from(track.querySelectorAll('.about-slide'));
   const tabs = Array.from(document.querySelectorAll('.about-tab'));
   const indicator = document.querySelector('.about-tab-indicator');
@@ -1230,11 +1233,13 @@ const backToTop = document.getElementById("backToTop");
     //setActiveDot(index);
     //if (label) label.textContent = slides[index].dataset.label || '';
     animating = false;
+    if (carousel) carousel.classList.add('is-flashing');
   }
 
   function goTo(index, direction) {
     if (animating || index === current || !slides[index]) return;
     animating = true;
+    if (carousel) carousel.classList.remove('is-flashing');
 
     // Move the tab highlight and underline right away so the click
     // feels instant -- the content flash transition below is slower
@@ -1292,7 +1297,6 @@ const backToTop = document.getElementById("backToTop");
   });
 
   // Left/right arrow key support while the panel has focus
-  const carousel = document.querySelector('.about-carousel');
   if (carousel) {
     carousel.setAttribute('tabindex', '0');
     carousel.addEventListener('keydown', (e) => {
@@ -1305,4 +1309,39 @@ const backToTop = document.getElementById("backToTop");
   // Keep the sliding indicator aligned with its tab if the layout reflows
   window.addEventListener('resize', () => moveIndicator(current));
   requestAnimationFrame(() => moveIndicator(current));
+})();
+
+
+(function initTooltipFlip() {
+  var triggers = document.querySelectorAll('.group.relative.inline-block');
+
+  triggers.forEach(function (trigger) {
+    var tip = trigger.querySelector(':scope > .absolute');
+    if (!tip) return;
+
+    function placeTooltip() {
+      // Reset to the default "open below" position first so we measure
+      // the tooltip's natural size/location before deciding to flip it.
+      tip.style.top = '';
+      tip.style.bottom = '';
+      tip.style.marginTop = '';
+      tip.style.marginBottom = '';
+
+      var triggerRect = trigger.getBoundingClientRect();
+      var tipHeight = tip.offsetHeight;
+      var spaceBelow = window.innerHeight - triggerRect.bottom;
+      var spaceAbove = triggerRect.top;
+      var GAP = 16; // ~ the mt-2/mb-2 spacing already used elsewhere
+
+      if (spaceBelow < tipHeight + GAP && spaceAbove > spaceBelow) {
+        tip.style.top = 'auto';
+        tip.style.bottom = '100%';
+        tip.style.marginBottom = '0.5rem';
+        tip.style.marginTop = '0';
+      }
+    }
+
+    trigger.addEventListener('mouseenter', placeTooltip);
+    trigger.addEventListener('focus', placeTooltip);
+  });
 })();

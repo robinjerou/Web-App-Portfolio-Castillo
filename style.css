@@ -188,8 +188,12 @@ button:focus-visible {
     */
 .about-carousel {
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; */
   border-radius: 0.5rem;
+}
+
+.about-carousel.is-flashing {
+  overflow: hidden;
 }
 
 .about-track {
