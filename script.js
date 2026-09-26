@@ -1181,7 +1181,7 @@ const backToTop = document.getElementById("backToTop");
 })();
 
 // About / Achievements / Certifications carousel
-// Arrow buttons + dots switch between the three slides using a fast
+// Arrow buttons + tabs (dots) switch between the three slides using a fast
 // "Flash" style transition: the current slide blur-dashes off in the
 // direction of travel while a lightning streak sweeps the panel, then
 // the next slide dashes in from the opposite side.
@@ -1190,7 +1190,8 @@ const backToTop = document.getElementById("backToTop");
   if (!track) return;
 
   const slides = Array.from(track.querySelectorAll('.about-slide'));
-  const dots = Array.from(document.querySelectorAll('.about-dot'));
+  const tabs = Array.from(document.querySelectorAll('.about-tab'));
+  const indicator = document.querySelector('.about-tab-indicator');
   const prevBtn = document.getElementById('about-prev');
   const nextBtn = document.getElementById('about-next');
   const label = document.getElementById('about-panel-label');
@@ -1200,24 +1201,46 @@ const backToTop = document.getElementById("backToTop");
   let current = Math.max(0, slides.findIndex((s) => s.classList.contains('active')));
   let animating = false;
 
-  function setActiveDot(index) {
-    dots.forEach((dot, i) => {
+  // function setActiveDot(index) {
+  //   dots.forEach((dot, i) => {
+  //     const isActive = i === index;
+  //     dot.classList.toggle('active', isActive);
+  //     dot.setAttribute('aria-selected', String(isActive));
+  //   });
+  // }
+
+  function moveIndicator(index) {
+    const tab = tabs[index];
+    if (!indicator || !tab) return;
+    indicator.style.width = `${tab.offsetWidth}px`;
+    indicator.style.transform = `translateX(${tab.offsetLeft}px)`;
+  }
+
+  function setActiveTab(index) {
+    tabs.forEach((tab, i) => {
       const isActive = i === index;
-      dot.classList.toggle('active', isActive);
-      dot.setAttribute('aria-selected', String(isActive));
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', String(isActive));
     });
+    moveIndicator(index);
   }
 
   function finish(index) {
     current = index;
-    setActiveDot(index);
-    if (label) label.textContent = slides[index].dataset.label || '';
+    //setActiveDot(index);
+    //if (label) label.textContent = slides[index].dataset.label || '';
     animating = false;
   }
 
   function goTo(index, direction) {
     if (animating || index === current || !slides[index]) return;
     animating = true;
+
+    // Move the tab highlight and underline right away so the click
+    // feels instant -- the content flash transition below is slower
+    // and shouldn't gate the "did this register" feedback.
+    setActiveTab(index);
+    if (label) label.textContent = slides[index].dataset.label || '';
 
     const outgoing = slides[current];
     const incoming = slides[index];
@@ -1260,9 +1283,9 @@ const backToTop = document.getElementById("backToTop");
   if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
   if (nextBtn) nextBtn.addEventListener('click', () => step(1));
 
-  dots.forEach((dot) => {
-    dot.addEventListener('click', () => {
-      const target = Number(dot.dataset.index);
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = Number(tab.dataset.index);
       if (Number.isNaN(target) || target === current) return;
       goTo(target, target > current ? 'next' : 'prev');
     });
@@ -1277,4 +1300,9 @@ const backToTop = document.getElementById("backToTop");
       if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     });
   }
+
+
+  // Keep the sliding indicator aligned with its tab if the layout reflows
+  window.addEventListener('resize', () => moveIndicator(current));
+  requestAnimationFrame(() => moveIndicator(current));
 })();

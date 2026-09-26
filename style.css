@@ -304,7 +304,7 @@ button:focus-visible {
 }
 
 /* Progress dots */
-.about-dot {
+/* .about-dot {
   width: 0.5rem;
   height: 0.5rem;
   padding: 0;
@@ -320,6 +320,68 @@ button:focus-visible {
 .about-dot.active {
   background-color: rgb(var(--accentText));
   transform: scale(1.35);
+} */
+
+/* Icon next to each achievement / certification entry */
+/* .achieve-icon {
+  font-size: 1.1rem;
+  line-height: 1.5rem;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-slide,
+  .flash-streak {
+    animation: none !important;
+  }
+} */
+
+
+/* Progress tabs */
+.about-tabs {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgb(var(--line));
+}
+.about-tabs::-webkit-scrollbar {
+  display: none;
+}
+.about-tab {
+  flex-shrink: 0;
+  padding: 0 0 0.75rem;
+  background: none;
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(var(--soft));
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.about-tab:hover {
+  color: rgb(var(--ink));
+}
+.about-tab.active {
+  color: rgb(var(--accentText));
+}
+.about-tab-indicator {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: 0;
+  background-color: rgb(var(--accentText));
+  border-radius: 1px;
+  transition: transform 0.3s cubic-bezier(.4, 0, .2, 1), width 0.3s cubic-bezier(.4, 0, .2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-tab-indicator {
+    transition: none;
+  }
 }
 
 /* Icon next to each achievement / certification entry */
@@ -335,6 +397,10 @@ button:focus-visible {
     animation: none !important;
   }
 }
+
+
+
+
 
 /* Divider lines between project rows */
 .project-row {

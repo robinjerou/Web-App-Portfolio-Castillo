@@ -161,6 +161,32 @@
       <p id="about-panel-label" class="text-sm text-soft pt-1 font-medium">About</p>
       <div class="max-w-xl">
         <div class="about-carousel relative">
+
+          <!-- new tabs ui for about carousel v2 -->
+          <div class="flex items-center gap-3 mb-6">
+            <button id="about-prev" type="button" class="about-arrow" aria-label="Previous section">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <div class="about-tabs flex-1" role="tablist" aria-label="About panel sections">
+              <button type="button" class="about-tab active" data-index="0" role="tab" aria-selected="true" aria-controls="about-panel-0" id="about-tab-0">About</button>
+              <button type="button" class="about-tab" data-index="1" role="tab" aria-selected="false" aria-controls="about-panel-1" id="about-tab-1">Achievements</button>
+              <button type="button" class="about-tab" data-index="2" role="tab" aria-selected="false" aria-controls="about-panel-2" id="about-tab-2">Certifications</button>
+              <span class="about-tab-indicator" aria-hidden="true"></span>
+            </div>
+
+            <button id="about-next" type="button" class="about-arrow" aria-label="Next section">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          
+
+
+          <!-- dots ui carousel v1 -->
           <div class="flash-streak" aria-hidden="true"></div>
           <div id="about-track" class="about-track">
             <div class="about-slide active" data-slide="0" data-label="About">
@@ -186,7 +212,7 @@
 
 
     <!-- ACHIEVEMENTS section -->
-            <div class="about-slide" data-slide="1" data-label="Achievements">
+            <div class="about-slide" data-slide="1" data-label="Achievements" id="about-panel-1" role="tabpanel" aria-labelledby="about-tab-1">
               <ul class="space-y-5">
                 <li class="flex gap-3">
                   <span class="achieve-icon" aria-hidden="true"></span>
@@ -236,7 +262,7 @@
     
     
     <!-- CERTIFICATIONS section -->
-            <div class="about-slide" data-slide="2" data-label="Certifications">
+            <div class="about-slide" data-slide="2" data-label="Certifications" id="about-panel-2" role="tabpanel" aria-labelledby="about-tab-2">
               <ul class="space-y-5">
                 <li class="flex gap-3">
                   <!-- <span class="achieve-icon" aria-hidden="true"></span> -->
@@ -366,7 +392,7 @@
         </div>
 
         <!-- Arrow controls + progress dots -->
-        <div class="flex items-center gap-4 mt-6">
+        <!-- <div class="flex items-center gap-4 mt-6">
           <button id="about-prev" type="button" class="about-arrow" aria-label="Previous section">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
@@ -384,7 +410,7 @@
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
-        </div>
+        </div> -->
       </div>
     </section>
 
@@ -754,7 +780,7 @@
         
         <!--<a href="robinjerouecastillo@gmail.com" class="link-underline text-ink hover:text-accentText">Email</a>-->
         <!--<a href="09621792918" class="link-underline text-ink hover:text-accentText">Contact Number</a>-->
-        <a href="https://github.com/robinjerou" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText">GitHub</a>
+        <a href="https://github.com/robinjerou" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText link-confirm">GitHub</a>
         <a href="https://robincastillo.jobs180.com/" target="_blank" rel="noopener noreferrer" class="link-underline text-ink hover:text-accentText link-confirm">Jobs180</a>
 
       </div>
