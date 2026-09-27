@@ -340,6 +340,229 @@ document.addEventListener('keydown', (e) => {
   });
 })();
 
+//tap to zoom viewer function
+(function initZoomViewer() {
+  const viewer = document.getElementById('zoom-viewer');
+  if (!viewer) return;
+
+  const stage = document.getElementById('zoom-viewer-stage');
+  const img = document.getElementById('zoom-viewer-img');
+  const closeBtn = document.getElementById('zoom-viewer-close');
+  const hint = viewer.querySelector('.zoom-viewer-hint');
+
+  const MIN_SCALE = 1;
+  const MAX_SCALE = 4;
+
+  let sourceEl = null;
+  let scale = 1;
+  let panX = 0;
+  let panY = 0;
+  let isOpen = false;
+
+  function applyTransform(animated) {
+    stage.style.transition = animated
+      ? 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+      : 'none';
+    stage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+  }
+
+  function clampPan() {
+    const rect = stage.getBoundingClientRect();
+    const maxX = Math.max(0, (rect.width * scale - rect.width) / 2 / scale);
+    const maxY = Math.max(0, (rect.height * scale - rect.height) / 2 / scale);
+    panX = Math.min(maxX, Math.max(-maxX, panX));
+    panY = Math.min(maxY, Math.max(-maxY, panY));
+  }
+
+  function resetZoom(animated) {
+    scale = 1;
+    panX = 0;
+    panY = 0;
+    applyTransform(animated);
+  }
+
+  function morphFrom(rectEl) {
+    const from = rectEl.getBoundingClientRect();
+    const to = stage.getBoundingClientRect();
+    const scaleFactor = from.width / to.width;
+    const dx = (from.left + from.width / 2) - (to.left + to.width / 2);
+    const dy = (from.top + from.height / 2) - (to.top + to.height / 2);
+    return `translate(${dx}px, ${dy}px) scale(${scaleFactor})`;
+  }
+
+  function openViewer(mediaEl) {
+    const sourceImg = mediaEl.querySelector('img');
+    if (!sourceImg) return;
+
+    sourceEl = sourceImg;
+    img.src = sourceImg.currentSrc || sourceImg.src;
+    img.alt = sourceImg.alt || '';
+
+    viewer.classList.remove('hidden');
+    viewer.classList.add('flex');
+    viewer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    hint.textContent = ('ontouchstart' in window)
+      ? 'Pinch to zoom · drag to pan · double-tap to reset'
+      : 'Scroll to zoom · drag to pan · double-click to reset';
+
+    resetZoom(false);
+
+    // Measure the thumbnail and the viewer's centered/final layout, then
+    // start the stage exactly on top of the thumbnail before animating it
+    // out to the centered, full-size position.
+    requestAnimationFrame(() => {
+      stage.style.transition = 'none';
+      stage.style.transform = morphFrom(sourceImg);
+      viewer.classList.add('zoom-open');
+
+      requestAnimationFrame(() => {
+        stage.style.transition = 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1)';
+        stage.style.transform = 'translate(0px, 0px) scale(1)';
+      });
+    });
+
+    isOpen = true;
+  }
+
+  function closeViewer() {
+    if (!isOpen) return;
+    isOpen = false;
+
+    if (sourceEl) {
+      stage.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 1, 1)';
+      stage.style.transform = morphFrom(sourceEl);
+    }
+    viewer.classList.remove('zoom-open');
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      viewer.classList.add('hidden');
+      viewer.classList.remove('flex');
+      viewer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      img.src = '';
+      stage.style.transition = 'none';
+      stage.style.transform = 'translate(0px, 0px) scale(1)';
+      scale = 1;
+      panX = 0;
+      panY = 0;
+      sourceEl = null;
+    };
+
+    stage.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 380);
+  }
+
+  document.querySelectorAll('.cert-media').forEach((el) => {
+    el.addEventListener('click', () => openViewer(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openViewer(el);
+      }
+    });
+  });
+
+  closeBtn.addEventListener('click', closeViewer);
+  viewer.addEventListener('click', (e) => {
+    if (e.target === viewer) closeViewer();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) closeViewer();
+  });
+
+  // Desktop: scroll to zoom, centered roughly on the viewport.
+  viewer.addEventListener('wheel', (e) => {
+    if (!isOpen) return;
+    e.preventDefault();
+    const delta = -e.deltaY * 0.0016;
+    scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale + delta * scale));
+    if (scale === MIN_SCALE) {
+      panX = 0;
+      panY = 0;
+    }
+    clampPan();
+    applyTransform(false);
+  }, { passive: false });
+
+  // Double-click / double-tap toggles between fit and a comfortable zoom level.
+  stage.addEventListener('dblclick', () => {
+    if (scale > 1) {
+      resetZoom(true);
+    } else {
+      scale = 2.4;
+      applyTransform(true);
+    }
+  });
+
+  // Pointer-based drag-to-pan and pinch-to-zoom, unified across mouse and touch.
+  const pointers = new Map();
+  let dragStart = null;
+  let pinchStartDist = null;
+  let pinchStartScale = 1;
+
+  function distance(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  stage.addEventListener('pointerdown', (e) => {
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size === 1 && scale > 1) {
+      dragStart = { x: e.clientX, y: e.clientY, panX, panY };
+    } else if (pointers.size === 2) {
+      const pts = Array.from(pointers.values());
+      pinchStartDist = distance(pts[0], pts[1]);
+      pinchStartScale = scale;
+    }
+
+    try {
+      stage.setPointerCapture(e.pointerId);
+    } catch (err) {
+      // Pointer capture can fail harmlessly if the pointer already ended.
+    }
+  });
+
+  stage.addEventListener('pointermove', (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size === 2 && pinchStartDist) {
+      const pts = Array.from(pointers.values());
+      const dist = distance(pts[0], pts[1]);
+      scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinchStartScale * (dist / pinchStartDist)));
+      clampPan();
+      applyTransform(false);
+    } else if (pointers.size === 1 && dragStart) {
+      const dxScreen = e.clientX - dragStart.x;
+      const dyScreen = e.clientY - dragStart.y;
+      panX = dragStart.panX + dxScreen / scale;
+      panY = dragStart.panY + dyScreen / scale;
+      clampPan();
+      applyTransform(false);
+    }
+  });
+
+  function endPointer(e) {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinchStartDist = null;
+    if (pointers.size === 0) dragStart = null;
+    if (scale <= MIN_SCALE) resetZoom(true);
+  }
+
+  stage.addEventListener('pointerup', endPointer);
+  stage.addEventListener('pointercancel', endPointer);
+})();
+
+
+
+
+
+
 //open new tab function
 (function initLinkConfirm() {
   const modal = document.getElementById('link-modal');
