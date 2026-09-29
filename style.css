@@ -354,6 +354,7 @@ button:focus-visible {
 }
 
 .zoom-viewer-close {
+  z-index: 2;
   position: absolute;
   top: 18px;
   right: 18px;
@@ -407,6 +408,30 @@ button:focus-visible {
     transition: none;
   }
 }
+
+
+/* PDF thumbnails: transparent click-catcher over the iframe */
+.cert-media-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.cert-media .cert-zoom-badge { z-index: 2; }
+
+/* PDF mode of the zoom viewer */
+.zoom-viewer-pdf {
+  display: none;
+  width: min(92vw, 900px);
+  height: 82vh;
+  border: 0;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+#zoom-viewer[data-mode="pdf"] .zoom-viewer-pdf { display: block; }
+#zoom-viewer[data-mode="pdf"] .zoom-viewer-stage { display: none; }
+#zoom-viewer[data-mode="pdf"] { touch-action: auto; }
 
 
 

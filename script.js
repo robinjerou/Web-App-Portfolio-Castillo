@@ -390,10 +390,40 @@ document.addEventListener('keydown', (e) => {
     return `translate(${dx}px, ${dy}px) scale(${scaleFactor})`;
   }
 
+  //for document file zoom
+  const pdfFrame = document.createElement('iframe');
+  pdfFrame.className = 'zoom-viewer-pdf';
+  pdfFrame.title = 'Document preview';
+  viewer.insertBefore(pdfFrame, hint);
+
+  function openPdf(frame) {
+    const base = (frame.getAttribute('src') || '').split('#')[0];
+    if (!base) return;
+
+    sourceEl = null;
+    viewer.dataset.mode = 'pdf';
+    pdfFrame.title = frame.title || 'Document preview';
+    pdfFrame.src = base + '#toolbar=1&navpanes=0&view=FitH';
+
+    viewer.classList.remove('hidden');
+    viewer.classList.add('flex');
+    viewer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    hint.textContent = 'Use the PDF controls to zoom · click outside to close';
+
+    requestAnimationFrame(() => viewer.classList.add('zoom-open'));
+    isOpen = true;
+  }
+
   function openViewer(mediaEl) {
     const sourceImg = mediaEl.querySelector('img');
-    if (!sourceImg) return;
+    if (!sourceImg){
+      const frame = mediaEl.querySelector('iframe');
+      if (frame) openPdf(frame);
+      return;
+    }
 
+    viewer.dataset.mode = 'image';
     sourceEl = sourceImg;
     img.src = sourceImg.currentSrc || sourceImg.src;
     img.alt = sourceImg.alt || '';
@@ -445,6 +475,8 @@ document.addEventListener('keydown', (e) => {
       viewer.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
       img.src = '';
+      pdfFrame.removeAttribute('src');
+      viewer.dataset.mode = '';
       stage.style.transition = 'none';
       stage.style.transform = 'translate(0px, 0px) scale(1)';
       scale = 1;
@@ -458,6 +490,13 @@ document.addEventListener('keydown', (e) => {
   }
 
   document.querySelectorAll('.cert-media').forEach((el) => {
+    //invisible layer over any thumbnail that contains an iframe
+    if (el.querySelector('iframe')) {
+      const hit = document.createElement('span');
+      hit.className = 'cert-media-hit';
+      hit.setAttribute('aria-hidden', 'true');
+      el.appendChild(hit);
+    }
     el.addEventListener('click', () => openViewer(el));
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
