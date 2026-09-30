@@ -93,7 +93,7 @@
 
 
       <!-- Dark mode toggle -->
-      <button id="theme-toggle" type="button" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
+      <!-- <button id="theme-toggle" type="button" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="4"></circle>
             <line x1="12" y1="2" x2="12" y2="4"></line>
@@ -108,8 +108,22 @@
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
-        </button>
+        </button> -->
 
+        <button id="theme-toggle" type="button" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
+          <span class="tt-sky" aria-hidden="true">
+            <span class="tt-stars">
+              <i></i><i></i><i></i><i></i><i></i><i></i>
+            </span>
+            <span class="tt-clouds">
+              <span class="tt-cloud tt-cloud-1"></span>
+              <span class="tt-cloud tt-cloud-2"></span>
+            </span>
+            <svg class="tt-bird tt-bird-1" viewBox="0 0 14 8"><path d="M0 6 Q7 -2 14 6 Q7 3 0 6Z" fill="currentColor"></path></svg>
+            <svg class="tt-bird tt-bird-2" viewBox="0 0 14 8"><path d="M0 6 Q7 -2 14 6 Q7 3 0 6Z" fill="currentColor"></path></svg>
+          </span>
+          <span class="tt-knob" aria-hidden="true"></span>
+        </button>
 
 
       <!-- Mobile menu button -->
