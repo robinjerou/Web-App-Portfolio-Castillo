@@ -745,7 +745,7 @@ button:focus-visible {
 
 
 /* Dark mode toggle button in the header */
-/* .theme-toggle {
+/* .theme-toggle-classic {
   width: 2.25rem;
   height: 2.25rem;
   display: flex;
@@ -759,24 +759,24 @@ button:focus-visible {
   transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.theme-toggle:hover {
+.theme-toggle-classic:hover {
   color: #3F5CE0;
   border-color: #3F5CE0;
 }
 
-.theme-toggle svg {
+.theme-toggle-classic svg {
   width: 1.1rem;
   height: 1.1rem;
 }
 
 /* Show the sun icon in light mode, the moon icon in dark mode */
-/* .theme-toggle .icon-moon {
+/* .theme-toggle-classic .icon-moon {
   display: none;
 }
-[data-theme="dark"] .theme-toggle .icon-sun {
+[data-theme="dark"] .theme-toggle-classic .icon-sun {
   display: none;
 }
-[data-theme="dark"] .theme-toggle .icon-moon {
+[data-theme="dark"] .theme-toggle-classic .icon-moon {
   display: block;
 } */
 
