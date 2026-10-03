@@ -1062,11 +1062,19 @@ button:focus-visible {
 
 
 
-/* ============================================
-   Tron-style light trail from the period
-   ============================================ */
-html, body {
-  overflow-x: hidden; /* prevents the trail from creating a horizontal scrollbar */
+/* 
+  Tron-style light trail from the period
+    */
+/* html, body {
+  overflow-x: hidden; 
+} */
+/* prevents the trail from creating a horizontal scrollbar */
+
+html {
+  overflow-x: hidden;
+}
+body {
+  overflow-x: clip;
 }
 
 .pulse-dot {
@@ -1819,4 +1827,95 @@ html, body {
     animation: none;
   }
   .fx-scan { display: none; }
+}
+
+
+
+
+/* 
+  WORK: scroll-linked project showcase
+  Left: project text. Right: sticky image that swaps as each
+  project scrolls into view (see "work showcase" in script.js).
+  */
+.work-split { display: block; }
+.work-visual { display: none; }
+.work-item { padding: 1.75rem 0; border-top: 1px solid rgb(var(--line)); }
+.work-item:last-child { border-bottom: 1px solid rgb(var(--line)); }
+.work-item-num {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgb(var(--soft));
+  margin-bottom: 0.5rem;
+}
+/* mobile: image sits inside each item */
+.work-item-media {
+  margin-bottom: 1rem;
+  border: 1px solid rgb(var(--line));
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: rgb(var(--surface));
+}
+.work-item-media img { width: 100%; height: auto; display: block; object-fit: contain; }
+
+@media (min-width: 768px) {
+  .work-split {
+    --item-min: 35vh;       /* height of each project. Raise for more space, lower for less */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .work-item {
+    padding: 1.5rem 0;
+    min-height: var(--item-min);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0.35;
+    transition: opacity 0.4s ease;
+  }
+  .work-item.is-active { opacity: 1; }
+  .work-item-media { display: none; }
+
+  .work-visual {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;    /* picture stays in the middle of the screen */
+    /* The negative margins start/stop the pinning half a project early/late, so the
+       picture is already centered next to project 1 and stays centered through project 6. */
+    margin-block: calc(var(--item-min) / 2 - 50vh);
+    pointer-events: none;   /* the invisible overlap never blocks clicks */
+  }
+  .work-visual-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 1px solid rgb(var(--line));
+    border-radius: 0.75rem;
+    background: rgb(var(--surface));
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+  .work-visual-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.75rem;
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .work-visual-img.is-active { opacity: 1; transform: none; }
+}
+@media (min-width: 1024px) {
+  .work-split { margin-inline: -3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-item, .work-visual-img { transition: none; }
 }

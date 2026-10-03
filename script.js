@@ -1708,3 +1708,49 @@ const backToTop = document.getElementById("backToTop");
     trigger.addEventListener('focus', placeTooltip);
   });
 })();
+
+
+
+
+// work showcase: swap the sticky image as each project scrolls into view
+(function () {
+  const items = Array.from(document.querySelectorAll('.work-item'));
+  const imgs = document.querySelectorAll('.work-visual-img');
+  const panel = document.querySelector('.work-visual');
+  if (!items.length) return;
+
+  let current = -1;
+  function activate(index) {
+    if (index === current) return;
+    current = index;
+    items.forEach((el, i) => el.classList.toggle('is-active', i === index));
+    imgs.forEach((el, i) => el.classList.toggle('is-active', i === index));
+  }
+
+  function update() {
+    // Reference line = vertical centre of the image panel (or screen centre on mobile)
+    let line = window.innerHeight / 2;
+    if (panel && panel.offsetParent !== null) {
+      const r = panel.getBoundingClientRect();
+      line = r.top + r.height / 2;
+    }
+    // Before the first project -> show 1, after the last -> show the last
+    let index = line < items[0].getBoundingClientRect().top ? 0 : items.length - 1;
+    for (let i = 0; i < items.length; i++) {
+      const r = items[i].getBoundingClientRect();
+      if (line >= r.top && line < r.bottom) { index = i; break; }
+    }
+    activate(index);
+  }
+
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; update(); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('load', update);
+  update();
+})();
