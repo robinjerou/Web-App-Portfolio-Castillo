@@ -1886,7 +1886,7 @@ body {
     display: flex;
     align-items: center;    /* picture stays in the middle of the screen */
     /* The negative margins start/stop the pinning half a project early/late, so the
-       picture is already centered next to project 1 and stays centered through project 6. */
+      picture is already centered next to project 1 and stays centered through project 6. */
     margin-block: calc(var(--item-min) / 2 - 50vh);
     pointer-events: none;   /* the invisible overlap never blocks clicks */
   }
@@ -1918,4 +1918,127 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .work-item, .work-visual-img { transition: none; }
+}
+
+
+
+/* Practicum portfolio book (page-turning PDF viewer) */
+.book-bleed {
+  --bw: min(1040px, calc(100vw - 3rem));
+  width: var(--bw);
+  margin-left: calc(50% - var(--bw) / 2);
+}
+.book-wrap {
+  --pw: 300px; --ph: 400px; --cols: 1; --spine: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.book-wrap:fullscreen {
+  background: rgb(var(--bg));
+  justify-content: center;
+  padding: 1rem;
+}
+
+.book-stage {
+  position: relative;
+  width: 100%;
+  min-height: 20rem;
+  padding: 1rem 0 1.5rem;
+  display: flex;
+  justify-content: center;
+  touch-action: pan-y; /* vertical scroll still works; horizontal swipes turn pages */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  outline: none;
+}
+.book-stage.is-dragging { cursor: grabbing; }
+.book-stage:focus-visible { outline: 2px solid #3F5CE0; outline-offset: 2px; border-radius: 0.5rem; }
+.book-wrap.is-ready .book-stage { min-height: 0; }
+
+.book-loading {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  padding: 0 1rem; text-align: center;
+  font-size: 0.875rem;
+  color: rgb(var(--soft));
+}
+.book-loading a { color: rgb(var(--accentText)); text-decoration: underline; }
+.book-wrap.is-ready .book-loading { display: none; }
+
+.book-shift {
+  display: none;
+  position: relative;
+  width: calc(var(--pw) * var(--cols));
+  height: var(--ph);
+  will-change: transform;
+}
+.book-wrap.is-ready .book-shift { display: block; }
+.book { position: absolute; inset: 0; perspective: 3600px; }
+
+/* Soft shadow under each half of the spread; script.js fades each in/out as the cover opens/closes */
+.book-shadow {
+  position: absolute; top: 0;
+  width: var(--pw); height: 100%;
+  pointer-events: none;
+  box-shadow: 0 22px 36px -16px rgb(0 0 0 / 0.5), 0 3px 8px rgb(0 0 0 / 0.14);
+}
+.book-shadow-l { left: 0; }
+.book-shadow-r { left: var(--spine); }
+
+/* One leaf = two sheets of paper (front and back) hinged on the spine */
+.leaf {
+  position: absolute; top: 0;
+  left: var(--spine);
+  width: var(--pw); height: var(--ph);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+}
+.leaf.peek { transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1); }
+.leaf.is-gone { visibility: hidden; }
+
+.face {
+  position: absolute; inset: 0;
+  background: #fff;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face.back { transform: rotateY(180deg); }
+.face canvas {
+  display: block; width: 100%; height: 100%;
+  object-fit: contain;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.face canvas.ready { opacity: 1; }
+
+/* gutter shading beside the spine + darkening while a page is mid-turn (--shade is set by script.js) */
+.face::before, .face::after { content: ''; position: absolute; pointer-events: none; }
+.face::before { top: 0; bottom: 0; width: 12%; z-index: 1; }
+.face.front::before { left: 0;  background: linear-gradient(to right, rgb(0 0 0 / 0.16), transparent); }
+.face.back::before  { right: 0; background: linear-gradient(to left,  rgb(0 0 0 / 0.16), transparent); }
+.face::after { inset: 0; z-index: 2; opacity: calc(var(--shade, 0) * 0.6); }
+.face.front::after { background: linear-gradient(to right, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.05)); }
+.face.back::after  { background: linear-gradient(to left,  rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.05)); }
+
+.book-controls {
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: 0.75rem 2rem;
+}
+.book-nav, .book-links { display: flex; align-items: center; gap: 0.75rem; }
+.book-links { gap: 1.25rem; }
+.book-status {
+  min-width: 8.5rem; text-align: center;
+  font-size: 0.875rem;
+  color: rgb(var(--soft));
+  font-variant-numeric: tabular-nums;
+}
+.book-controls .about-arrow:disabled { opacity: 0.35; pointer-events: none; }
+.book-controls button[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf.peek, .face canvas { transition: none; }
 }

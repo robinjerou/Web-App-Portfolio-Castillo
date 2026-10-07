@@ -1754,3 +1754,333 @@ const backToTop = document.getElementById("backToTop");
   window.addEventListener('load', update);
   update();
 })();
+
+
+
+//Practicum portfolio book
+
+//Renders the practicum PDF (PDF.js, loaded lazily) as paper leaves hinged on a spine.
+//Drag / swipe a page, tap its half, use the arrows or the keyboard to turn it.
+//Two-page spread on wide screens, single page on phones.
+(function initPracticumBook() {
+  const root = document.getElementById('practicum-book');
+  if (!root) return;
+
+  const stage   = root.querySelector('.book-stage');
+  const shift   = root.querySelector('.book-shift');
+  const book    = root.querySelector('.book');
+  const shadowL = root.querySelector('.book-shadow-l');
+  const shadowR = root.querySelector('.book-shadow-r');
+  const prevBtn = root.querySelector('[data-book-prev]');
+  const nextBtn = root.querySelector('[data-book-next]');
+  const status  = root.querySelector('.book-status');
+  const fsBtn   = root.querySelector('[data-book-fs]');
+  const loading = root.querySelector('.book-loading');
+
+  const PDFJS  = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp  = (v, a, b) => Math.min(b, Math.max(a, v));
+  const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+  const easeOut   = (k) => 1 - Math.pow(1 - k, 3);
+
+  let pdf = null, N = 0, ratio = 1.294; //page count + page height/width
+  let spread = true, pageW = 0, pageH = 0;
+  let L = 0, maxCur = 0, current = 0; //leaves, furthest allowed position, leaves turned so far
+  let leaves = [], canvases = new Map();
+  let busy = false, drag = null, peek = null, gen = 0, lastW = 0;
+  const rendered = new Set(); let queue = [], pumping = false;
+
+  //load PDF.js + document
+  function loadLib() {
+    if (window.pdfjsLib) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = PDFJS + 'pdf.min.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function start() {
+    try {
+      await loadLib();
+      pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+      pdf = await pdfjsLib.getDocument(root.dataset.pdf).promise;
+      N = pdf.numPages;
+      const v = (await pdf.getPage(1)).getViewport({ scale: 1 });
+      ratio = v.height / v.width;
+      layout();
+      root.classList.add('is-ready');
+      lastW = stage.clientWidth;
+      new ResizeObserver(onResize).observe(stage);
+      if (!reduce) setTimeout(introNudge, 700);
+    } catch (err) {
+      loading.innerHTML = 'The portfolio preview could not load. <a href="' + root.dataset.pdf + '" target="_blank" rel="noopener noreferrer">Open the PDF</a> instead.';
+    }
+  }
+
+  //Load only when the section is about to scroll into view
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
+    }, { rootMargin: '400px 0px' });
+    io.observe(root);
+  } else start();
+
+  //layout
+  function measure() {
+    const avail = stage.clientWidth;
+    const maxH = Math.max(360, window.innerHeight - (document.fullscreenElement ? 110 : 170));
+    const wantSpread = avail >= 640;
+    const w = Math.min(wantSpread ? avail / 2 : Math.min(avail, 520), maxH / ratio);
+    return { wantSpread, w: Math.floor(w) };
+  }
+
+  function layout() {
+    const m = measure();
+    const pageIdx = leaves.length ? (spread ? current * 2 : current) : 0;   // page showing on the right/only slot
+    const modeChanged = !leaves.length || m.wantSpread !== spread;
+    spread = m.wantSpread; pageW = m.w; pageH = Math.round(pageW * ratio);
+    root.style.setProperty('--pw', pageW + 'px');
+    root.style.setProperty('--ph', pageH + 'px');
+    root.style.setProperty('--cols', spread ? 2 : 1);
+    root.style.setProperty('--spine', spread ? pageW + 'px' : '0px');
+    gen++; rendered.clear();
+    if (modeChanged) {
+      build();
+      current = clamp(spread ? Math.floor(pageIdx / 2) : pageIdx, 0, maxCur);
+    }
+    rest(); renderWindow(); updateUI();
+  }
+
+  function build() {
+    book.textContent = ''; leaves = []; canvases = new Map(); queue = [];
+    L = spread ? Math.ceil(N / 2) : N;
+    maxCur = spread ? (N % 2 ? L - 1 : L) : N - 1;       // odd page counts end on a full spread
+    for (let i = 0; i < L; i++) {
+      const leaf = document.createElement('div');
+      leaf.className = 'leaf';
+      leaf.append(makeFace('front', spread ? 2 * i : i), makeFace('back', spread ? 2 * i + 1 : -1));
+      book.appendChild(leaf); leaves.push(leaf);
+    }
+  }
+
+  function makeFace(side, p) {
+    const f = document.createElement('div');
+    f.className = 'face ' + side;
+    if (p >= 0 && p < N) {
+      const c = document.createElement('canvas');
+      c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'Page ' + (p + 1));
+      f.appendChild(c); canvases.set(p, c);
+    }
+    return f;
+  }
+
+  let resizeTimer;
+  function onResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const w = stage.clientWidth;
+      if (w === lastW && !document.fullscreenElement === !root.dataset.fs) return;
+      lastW = w; root.dataset.fs = document.fullscreenElement ? '1' : '';
+      if (!busy && !drag) layout();
+    }, 150);
+  }
+
+  //painting
+  const zFor = (i) => (i < current ? i + 1 : L - i);
+
+  function paint(i, a) {
+    const l = leaves[i];
+    l.style.transform = 'rotateY(' + -a + 'deg)';
+    l.style.setProperty('--shade', Math.sin(a * Math.PI / 180).toFixed(3));
+  }
+
+  //Put every leaf at rest: flipped ones on the left, the rest stacked on the right
+  function rest() {
+    leaves.forEach((l, i) => {
+      const flipped = i < current;
+      l.classList.remove('peek');
+      paint(i, flipped ? 180 : 0);
+      l.style.zIndex = zFor(i);
+      l.classList.toggle('is-gone', !spread && flipped);
+    });
+    peek = null; place(current);
+  }
+
+  //pf = how many leaves are turned (fractional while one is mid-turn); slides the book so a closed cover/back stays centred
+  function place(pf) {
+    const s = spread ? -pageW / 2 * clamp(1 - pf, 0, 1) + pageW / 2 * clamp(pf - (L - 1), 0, 1) : 0;
+    shift.style.transform = 'translateX(' + s + 'px)';
+    shadowL.style.opacity = spread ? clamp(pf, 0, 1) : 0;
+    shadowR.style.opacity = spread ? clamp(L - pf, 0, 1) : 1;
+  }
+
+  function tween(i, from, to, ms, ease, done) {
+    busy = true; clearPeek();
+    leaves[i].classList.remove('is-gone'); leaves[i].style.zIndex = L + 5;
+    const t0 = performance.now(); if (reduce) ms = 0;
+    (function step(now) {
+      const k = ms ? clamp((now - t0) / ms, 0, 1) : 1;
+      const a = from + (to - from) * ease(k);
+      paint(i, a); place(i + a / 180);
+      if (k < 1) requestAnimationFrame(step); else { busy = false; done(); }
+    })(t0);
+  }
+  const duration = (from, to) => 220 + Math.abs(to - from) / 180 * 520;
+
+  function go(dir) {
+    if (busy || (dir > 0 ? current >= maxCur : current <= 0)) return;
+    const i = dir > 0 ? current : current - 1;
+    const from = dir > 0 ? 0 : 180, to = dir > 0 ? 180 : 0;
+    tween(i, from, to, duration(from, to), easeInOut, () => { current += dir; rest(); renderWindow(); updateUI(); });
+  }
+
+  //rendering pages to canvas (only a window around the reader)
+  function renderWindow() {
+    const centre = spread ? current * 2 - 0.5 : current;
+    const reach = spread ? 6 : 4;
+    const want = [];
+    for (let p = Math.max(0, Math.ceil(centre - reach)); p <= Math.min(N - 1, Math.floor(centre + reach + 1)); p++) want.push(p);
+    want.sort((a, b) => Math.abs(a - centre) - Math.abs(b - centre));
+    const keep = new Set(want);
+    rendered.forEach((p) => {                              // free memory for far-away pages
+      if (!keep.has(p)) { const c = canvases.get(p); if (c) { c.width = c.height = 0; c.classList.remove('ready'); } rendered.delete(p); }
+    });
+    queue = want.filter((p) => !rendered.has(p));
+    pump();
+  }
+
+  async function pump() {
+    if (pumping) return;
+    pumping = true; const g = gen;
+    while (queue.length) {
+      const p = queue.shift(), c = canvases.get(p);
+      if (!c || rendered.has(p)) continue;
+      try {
+        const page = await pdf.getPage(p + 1);
+        if (g !== gen) break;
+        const v0 = page.getViewport({ scale: 1 });
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const v = page.getViewport({ scale: Math.min(pageW * dpr / v0.width, pageH * dpr / v0.height) });
+        c.width = Math.floor(v.width); c.height = Math.floor(v.height);
+        await page.render({ canvasContext: c.getContext('2d'), viewport: v }).promise;
+        if (g === gen) { rendered.add(p); c.classList.add('ready'); }
+      } catch (e) { /* skip a page that fails to render */ }
+    }
+    pumping = false;
+    if (g !== gen) pump();
+  }
+
+  //UI text
+  function updateUI() {
+    prevBtn.disabled = current <= 0;
+    nextBtn.disabled = current >= maxCur;
+    let txt;
+    if (!spread) txt = 'Page ' + (current + 1) + ' of ' + N;
+    else {
+      const a = current > 0 ? current * 2 : 0, b = current * 2 + 1 <= N ? current * 2 + 1 : 0;
+      txt = a && b ? 'Pages ' + a + '–' + b + ' of ' + N : 'Page ' + (a || b) + ' of ' + N;
+      if (current === 0) txt = 'Cover';
+    }
+    status.textContent = txt;
+  }
+
+  //peek: pages lift slightly when the mouse nears an edge
+  function setPeek(w) {
+    if (peek && w && peek.i === w.i) return;
+    if (peek) { const i = peek.i; paint(i, i < current ? 180 : 0); setTimeout(() => { if (!peek || peek.i !== i) { leaves[i].classList.remove('peek'); leaves[i].style.zIndex = zFor(i); } }, 320); }
+    peek = w;
+    if (w) { const l = leaves[w.i]; l.classList.add('peek'); l.style.zIndex = L + 5; paint(w.i, w.a); }
+  }
+  function clearPeek() {
+    if (!peek) return;
+    const i = peek.i; leaves[i].classList.remove('peek'); paint(i, i < current ? 180 : 0); leaves[i].style.zIndex = zFor(i); peek = null;
+  }
+  function introNudge() {
+    if (current !== 0 || drag || busy || peek) return;
+    setPeek({ i: 0, a: 16 }); setTimeout(() => { if (peek && peek.i === 0 && current === 0) setPeek(null); }, 1100);
+  }
+  function hover(e) {
+    if (e.pointerType !== 'mouse' || busy || drag) return;
+    const r = book.getBoundingClientRect(), x = e.clientX - r.left, edge = pageW * 0.18;
+    const inside = e.clientY >= r.top && e.clientY <= r.bottom && x >= 0 && x <= r.width;
+    let want = null;
+    if (inside) {
+      if (x > r.width - edge && current < maxCur) want = { i: current, a: 14 };
+      else if (spread && x < edge && current > 0) want = { i: current - 1, a: 166 };
+    }
+    setPeek(want);
+  }
+
+  //pointer: drag / swipe / tap
+  stage.addEventListener('pointerdown', (e) => {
+    if (busy || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    clearPeek();
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, active: false, samples: [[e.clientX, e.timeStamp]] };
+  });
+
+  stage.addEventListener('pointermove', (e) => {
+    if (!drag) { hover(e); return; }
+    if (e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if (!drag.active) {
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      const fwd = dx < 0;
+      if (fwd ? current >= maxCur : current <= 0) { drag = null; return; }
+      Object.assign(drag, { active: true, fwd, i: fwd ? current : current - 1 });
+      leaves[drag.i].classList.remove('is-gone'); leaves[drag.i].style.zIndex = L + 5;
+      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+      stage.classList.add('is-dragging');
+    }
+    drag.prog = clamp((drag.fwd ? -dx : dx) / (pageW * (spread ? 1.5 : 1)), 0, 1);
+    const a = drag.fwd ? drag.prog * 180 : 180 - drag.prog * 180;
+    paint(drag.i, a); place(drag.i + a / 180);
+    drag.samples.push([e.clientX, e.timeStamp]); if (drag.samples.length > 5) drag.samples.shift();
+  });
+
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null; stage.classList.remove('is-dragging');
+    if (!d.active) { if (e.type === 'pointerup') tap(e); return; }
+    const s = d.samples, a = s[0], b = s[s.length - 1];
+    const vx = b[1] > a[1] ? (b[0] - a[0]) / (b[1] - a[1]) : 0;          // px per ms
+    const toward = d.fwd ? -vx : vx;                                     // > 0 means still moving through the turn
+    const complete = e.type === 'pointerup' && (toward > 0.35 || (d.prog > 0.35 && toward > -0.35));
+    const from = d.fwd ? d.prog * 180 : 180 - d.prog * 180;
+    const to = d.fwd === complete ? 180 : 0;
+    tween(d.i, from, to, duration(from, to), easeOut, () => {
+      if (complete) current += d.fwd ? 1 : -1;
+      rest(); renderWindow(); updateUI();
+    });
+  }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+  stage.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && !drag) setPeek(null); });
+
+  function tap(e) {
+    const r = book.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
+    const spineX = spread ? r.left + pageW : r.left + pageW * 0.35;
+    go(e.clientX >= spineX ? 1 : -1);
+  }
+
+  //buttons, keyboard, full screen
+  prevBtn.addEventListener('click', () => go(-1));
+  nextBtn.addEventListener('click', () => go(1));
+  stage.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  });
+
+  if (fsBtn) {
+    if (!root.requestFullscreen) fsBtn.hidden = true;
+    else {
+      fsBtn.addEventListener('click', () => (document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen()));
+      document.addEventListener('fullscreenchange', () => {
+        fsBtn.textContent = document.fullscreenElement === root ? 'Exit full screen' : 'Full screen';
+        setTimeout(() => { if (pdf && !busy) layout(); }, 80);
+      });
+    }
+  }
+})();
