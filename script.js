@@ -1796,12 +1796,43 @@ const backToTop = document.getElementById("backToTop");
     return new Promise((resolve, reject) => {
       const s = document.createElement('script');
       s.src = PDFJS + 'pdf.min.js';
-      s.onload = resolve; s.onerror = reject;
+      //s.onload = resolve; s.onerror = reject;
+      s.onload = resolve;
+      s.onerror = () => { s.remove(); reject(new Error('PDF.js failed to load')); };
       document.head.appendChild(s);
     });
   }
 
+
+  //error handling for document not displaying
+  let starting = false, observing = false;
+
+  function showError() {
+    loading.textContent = '';
+    const box = document.createElement('div');
+    box.className = 'book-error';
+    const msg = document.createElement('p');
+    msg.innerHTML = 'The portfolio preview could not load. Check your connection and try again, or <a href="' + root.dataset.pdf + '" target="_blank" rel="noopener noreferrer">open the PDF</a> directly.';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'about-arrow book-retry';
+    btn.setAttribute('aria-label', 'Try loading the portfolio again');
+    btn.title = 'Try again';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
+    btn.addEventListener('click', () => {
+      btn.disabled = true; btn.classList.add('is-spinning');
+      msg.textContent = 'Trying again…';
+      setTimeout(start, 350);
+    });
+    box.append(msg, btn);
+    loading.appendChild(box);
+  }
+
+
   async function start() {
+    if (starting) return;
+    starting = true;
+    loading.textContent = 'Opening the portfolio…';
     try {
       await loadLib();
       pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
@@ -1812,10 +1843,12 @@ const backToTop = document.getElementById("backToTop");
       layout();
       root.classList.add('is-ready');
       lastW = stage.clientWidth;
-      new ResizeObserver(onResize).observe(stage);
+      if (!observing) { observing = true; new ResizeObserver(onResize).observe(stage); }
       if (!reduce) setTimeout(introNudge, 700);
     } catch (err) {
-      loading.innerHTML = 'The portfolio preview could not load. <a href="' + root.dataset.pdf + '" target="_blank" rel="noopener noreferrer">Open the PDF</a> instead.';
+      showError();
+    } finally {
+      starting = false;
     }
   }
 

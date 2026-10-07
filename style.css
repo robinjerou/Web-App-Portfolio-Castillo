@@ -1966,6 +1966,10 @@ body {
   color: rgb(var(--soft));
 }
 .book-loading a { color: rgb(var(--accentText)); text-decoration: underline; }
+.book-error { display: flex; flex-direction: column; align-items: center; gap: 1rem; max-width: 22rem; }
+.book-retry:disabled { pointer-events: none; }
+.book-retry.is-spinning svg { animation: book-spin 0.7s linear infinite; }
+@keyframes book-spin { to { transform: rotate(360deg); } }
 .book-wrap.is-ready .book-loading { display: none; }
 
 .book-shift {
