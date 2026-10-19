@@ -966,7 +966,7 @@
           <img src="pictures/1902 certification background.png" alt="Preview screenshot of the Completing OJT and Receiving Certification" class="work-visual-img is-active" data-index="0">
           <img src="pictures/peroptyx showcase.jpg" alt="Preview screenshot of Peroptyx" class="work-visual-img is-active" data-index="1">
           <!-- <img src="pictures/Daddy Android App.png" alt="Preview screenshot of the SideEye system" class="work-visual-img is-active" data-index="0">
-          <img src="pictures/unisouthlogo.png" alt="Preview screenshot of the system" class="work-visual-img" data-index="1">
+          <img src="pictures/unisouthlogo.png" alt="Preview screenshot of the  system" class="work-visual-img" data-index="1">
           <img src="pictures/bsp visualization.png" alt="Preview screenshot of the visualization" class="work-visual-img" data-index="2">
           <img src="pictures/eec logo.jpeg" alt="Preview screenshot of the system" class="work-visual-img" data-index="3">
           <img src="pictures/pawfect logo.png" alt="Preview screenshot of the system" class="work-visual-img" data-index="4">
@@ -985,30 +985,40 @@
 
       <div class="book-bleed">
         <div id="practicum-book" class="book-wrap" data-pdf="documents/2026_BSIT_PracticumPortfolio-Castillo_RobinJerou.pdf">
-          <div class="book-stage" tabindex="0" role="group" aria-roledescription="book" aria-label="Practicum portfolio. Use the left and right arrow keys to turn pages.">
-            <div class="book-loading" role="status">Opening the portfolio...</div>
-            <div class="book-shift">
-              <div class="book-shadow book-shadow-l"></div>
-              <div class="book-shadow book-shadow-r"></div>
-              <div class="book"></div>
+          <div class="book-body">
+            <div class="book-stage" tabindex="0" role="group" aria-roledescription="book" aria-label="Practicum portfolio. Use the left and right arrow keys to turn pages.">
+              <div class="book-loading" role="status">Opening the portfolio...</div>
+              <div class="book-shift">
+                <div class="book-shadow book-shadow-l"></div>
+                <div class="book-shadow book-shadow-r"></div>
+                <div class="book"></div>
+              </div>
             </div>
+
+            <!-- Page list: side panel beside the open book on wide screens, a popover (Pages button) on small ones -->
+            <aside class="book-toc" id="book-toc" aria-label="Pages in the portfolio">
+              <p class="book-toc-title">Pages</p>
+              <div class="book-toc-sections" hidden></div>
+              <ol class="book-toc-pages"></ol>
+            </aside>
           </div>
 
           <div class="book-controls">
             <div class="book-nav">
-              <button type="button" class="about-arrow" data-book-prev arial-label="Previous pages" disabled>
+              <button type="button" class="about-arrow" data-book-prev aria-label="Previous pages" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
               <p class="book-status" aria-live="polite">Cover</p>
-              <button type="button" class="about-arrow" data-book-next arial-label="Next pages" disabled>
+              <button type="button" class="about-arrow" data-book-next aria-label="Next pages" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </button>
             </div>
             <div class="book-links">
+              <button type="button" class="link-underline text-sm text-ink hover:text-accentText" data-book-toc aria-expanded="false" aria-controls="book-toc">Pages</button>
               <button type="button" class="link-underline text-sm text-ink hover:text-accentText" data-book-fs>Full screen</button> <!-- data-book-download seems better because it doesnt cause lag or performance issues as being slow, also maybe fix this since its also buggy like the hovering interaction & etc. -->
               <a href="documents/2026_BSIT_PracticumPortfolio-Castillo_RobinJerou.pdf" target="_blank" rel="noopener noreferrer" class="link-underline text-sm text-ink hover:text-accentText" >Open PDF</a>
             </div>

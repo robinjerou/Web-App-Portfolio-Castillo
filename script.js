@@ -1776,6 +1776,12 @@ const backToTop = document.getElementById("backToTop");
   const status  = root.querySelector('.book-status');
   const fsBtn   = root.querySelector('[data-book-fs]');
   const loading = root.querySelector('.book-loading');
+  const toc      = root.querySelector('.book-toc');
+  const tocTitle = root.querySelector('.book-toc-title');
+  const tocSections = root.querySelector('.book-toc-sections');
+  const tocPages = root.querySelector('.book-toc-pages');
+  const tocBtn   = root.querySelector('[data-book-toc]');
+  const TOC_W = 190, TOC_GAP = 24;     // side panel width + gap (px) on wide screens
 
   const PDFJS  = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1787,7 +1793,8 @@ const backToTop = document.getElementById("backToTop");
   let spread = true, pageW = 0, pageH = 0;
   let L = 0, maxCur = 0, current = 0; //leaves, furthest allowed position, leaves turned so far
   let leaves = [], canvases = new Map();
-  let busy = false, drag = null, peek = null, gen = 0, lastW = 0;
+  let busy = false, drag = null, peek = null, gen = 0, lastW = 0, lastDpr = 1, hasToc = false;
+  let pxRatio = 1, pageDev = 0, pageHDev = 0;   // screen pixel ratio + page size in real screen pixels
   const rendered = new Set(); let queue = [], pumping = false;
 
   //load PDF.js + document
@@ -1841,9 +1848,10 @@ const backToTop = document.getElementById("backToTop");
       const v = (await pdf.getPage(1)).getViewport({ scale: 1 });
       ratio = v.height / v.width;
       layout();
+      buildToc(); loadOutline();
       root.classList.add('is-ready');
       lastW = stage.clientWidth;
-      if (!observing) { observing = true; new ResizeObserver(onResize).observe(stage); }
+      if (!observing) { observing = true; new ResizeObserver(onResize).observe(stage); window.addEventListener('resize', onResize); }
       if (!reduce) setTimeout(introNudge, 700);
     } catch (err) {
       showError();
@@ -1863,21 +1871,31 @@ const backToTop = document.getElementById("backToTop");
   //layout
   function measure() {
     const avail = stage.clientWidth;
-    const maxH = Math.max(360, window.innerHeight - (document.fullscreenElement ? 110 : 170));
+    const maxH = Math.max(650, window.innerHeight - (document.fullscreenElement ? 110 : 90));   // big pages first; a short window just scrolls a little
     const wantSpread = avail >= 640;
-    const w = Math.min(wantSpread ? avail / 2 : Math.min(avail, 520), maxH / ratio);
-    return { wantSpread, w: Math.floor(w) };
+    const wide = avail >= 940;                                   // room for the page list beside the book
+    const area = wide ? avail - TOC_W - TOC_GAP : avail;
+    const w = Math.min(wantSpread ? area / 2 : Math.min(avail, 520), maxH / ratio);
+    const dpr = window.devicePixelRatio || 1;
+    // Size the page in whole, even numbers of SCREEN pixels so the canvas maps 1:1 onto the display (no resampling = sharp text)
+    return { wantSpread, wide, dpr, wDev: Math.max(2, Math.floor(w * dpr / 2) * 2) };
   }
 
   function layout() {
     const m = measure();
+    hasToc = m.wide;
+    root.classList.toggle('has-toc', hasToc);
+    root.style.setProperty('--toc-w', TOC_W + 'px');
     const pageIdx = leaves.length ? (spread ? current * 2 : current) : 0;   // page showing on the right/only slot
     const modeChanged = !leaves.length || m.wantSpread !== spread;
-    spread = m.wantSpread; pageW = m.w; pageH = Math.round(pageW * ratio);
-    root.style.setProperty('--pw', pageW + 'px');
-    root.style.setProperty('--ph', pageH + 'px');
+    spread = m.wantSpread; pxRatio = m.dpr;
+    pageDev = m.wDev; pageHDev = Math.round(pageDev * ratio);
+    pageW = pageDev / pxRatio; pageH = pageHDev / pxRatio;          // CSS size that equals exactly pageDev x pageHDev screen pixels
+    lastDpr = pxRatio;
+    root.style.setProperty('--pw', pageW.toFixed(4) + 'px');
+    root.style.setProperty('--ph', pageH.toFixed(4) + 'px');
     root.style.setProperty('--cols', spread ? 2 : 1);
-    root.style.setProperty('--spine', spread ? pageW + 'px' : '0px');
+    root.style.setProperty('--spine', spread ? pageW.toFixed(4) + 'px' : '0px');
     gen++; rendered.clear();
     if (modeChanged) {
       build();
@@ -1914,7 +1932,7 @@ const backToTop = document.getElementById("backToTop");
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       const w = stage.clientWidth;
-      if (w === lastW && !document.fullscreenElement === !root.dataset.fs) return;
+      if (w === lastW && lastDpr === (window.devicePixelRatio || 1) && !document.fullscreenElement === !root.dataset.fs) return;
       lastW = w; root.dataset.fs = document.fullscreenElement ? '1' : '';
       if (!busy && !drag) layout();
     }, 150);
@@ -1925,7 +1943,11 @@ const backToTop = document.getElementById("backToTop");
 
   function paint(i, a) {
     const l = leaves[i];
-    l.style.transform = 'rotateY(' + -a + 'deg)';
+    // At rest (0° / 180°) leaves are drawn flat, with no 3D transform, so the page bitmap is never resampled = sharpest text.
+    // Only while a page is actually turning does it use the 3D rotation.
+    if (a === 0) { l.classList.remove('is-left'); l.style.transform = 'none'; }
+    else if (a === 180) { l.classList.add('is-left'); l.style.transform = 'translateX(-100%)'; }
+    else { l.classList.remove('is-left'); l.style.transform = 'rotateY(' + -a + 'deg)'; }
     l.style.setProperty('--shade', Math.sin(a * Math.PI / 180).toFixed(3));
   }
 
@@ -1943,8 +1965,9 @@ const backToTop = document.getElementById("backToTop");
 
   //pf = how many leaves are turned (fractional while one is mid-turn); slides the book so a closed cover/back stays centred
   function place(pf) {
-    const s = spread ? -pageW / 2 * clamp(1 - pf, 0, 1) + pageW / 2 * clamp(pf - (L - 1), 0, 1) : 0;
-    shift.style.transform = 'translateX(' + s + 'px)';
+    let s = spread ? -pageW / 2 * clamp(1 - pf, 0, 1) + pageW / 2 * clamp(pf - (L - 1), 0, 1) : 0;
+    if (hasToc) s += (TOC_W + TOC_GAP) / 2 * clamp(1 - pf, 0, 1);   // closed cover sits centred; the page list fades in once it opens
+    shift.style.transform = 'translateX(' + Math.round(s * pxRatio) / pxRatio + 'px)';   // always a whole number of screen pixels
     shadowL.style.opacity = spread ? clamp(pf, 0, 1) : 0;
     shadowR.style.opacity = spread ? clamp(L - pf, 0, 1) : 1;
   }
@@ -1969,18 +1992,120 @@ const backToTop = document.getElementById("backToTop");
     tween(i, from, to, duration(from, to), easeInOut, () => { current += dir; rest(); renderWindow(); updateUI(); });
   }
 
+  //page list (table of contents) + jump animation
+  function buildToc() {
+    tocPages.textContent = '';
+    for (let p = 0; p < N; p++) {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'book-toc-chip'; b.dataset.page = p; b.textContent = p + 1;
+      b.setAttribute('aria-label', p === 0 ? 'Go to the cover, page 1' : 'Go to page ' + (p + 1));
+      li.appendChild(b); tocPages.appendChild(li);
+    }
+    updateUI();
+  }
+
+  // If the PDF has bookmarks, list them as named sections above the page numbers
+  async function loadOutline() {
+    try {
+      const out = await pdf.getOutline();
+      if (!out || !out.length) return;
+      const items = [];
+      for (const o of out.slice(0, 24)) {
+        let dest = o.dest;
+        if (typeof dest === 'string') dest = await pdf.getDestination(dest);
+        if (!Array.isArray(dest)) continue;
+        const idx = typeof dest[0] === 'object' ? await pdf.getPageIndex(dest[0]) : dest[0];
+        if (Number.isInteger(idx) && idx >= 0 && idx < N) items.push({ title: (o.title || '').trim(), page: idx });
+      }
+      if (!items.length) return;
+      tocSections.textContent = '';
+      items.forEach((it) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'book-toc-section'; b.dataset.page = it.page;
+        const t = document.createElement('span'), n = document.createElement('span');
+        t.textContent = it.title || 'Page ' + (it.page + 1); n.textContent = it.page + 1;
+        b.append(t, n); tocSections.appendChild(b);
+      });
+      tocSections.hidden = false; tocTitle.textContent = 'Contents';
+    } catch (e) { /* no bookmarks: the page numbers are enough */ }
+  }
+
+  function markToc(pages) {
+    tocPages.querySelectorAll('.book-toc-chip').forEach((b) => {
+      const on = pages.indexOf(+b.dataset.page) !== -1;
+      b.classList.toggle('is-current', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    const act = tocPages.querySelector('.is-current');          // keep the active number in view inside the panel
+    if (act && toc.scrollHeight > toc.clientHeight) toc.scrollTo({ top: act.offsetTop - toc.clientHeight / 2, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  // Flip every leaf between here and the target in one quick, staggered flurry: farther pages = more leaves
+  function jumpTo(page) {
+    if (busy) return;
+    const target = clamp(spread ? Math.ceil(page / 2) : page, 0, maxCur);
+    if (target === current) return;
+    clearPeek(); renderWindow(target);
+    markToc(spread ? [target > 0 ? target * 2 - 1 : -1, target * 2 < N ? target * 2 : -1] : [target]);   // highlight the destination right away
+    if (reduce) { current = target; rest(); renderWindow(); updateUI(); return; }
+    const fwd = target > current, idxs = [];
+    if (fwd) for (let i = current; i < target; i++) idxs.push(i);
+    else for (let i = current - 1; i >= target; i--) idxs.push(i);
+    const base = fwd ? current : target;
+    const per = 380, gap = idxs.length > 1 ? clamp(1000 / (idxs.length - 1), 26, 130) : 0;
+    const total = per + gap * (idxs.length - 1);
+    busy = true;
+    idxs.forEach((i) => leaves[i].classList.remove('is-gone'));
+    const t0 = performance.now();
+    (function step(now) {
+      const el = now - t0; let sum = 0;
+      idxs.forEach((i, k) => {
+        const e = easeInOut(clamp((el - k * gap) / per, 0, 1));
+        const a = fwd ? 180 * e : 180 - 180 * e;
+        paint(i, a); sum += a / 180;
+        leaves[i].style.zIndex = 1000 + (a < 90 ? L - i : i);   // leaves on the right stack low-to-high, on the left the reverse
+      });
+      place(base + sum);
+      if (el < total) requestAnimationFrame(step);
+      else { busy = false; current = target; rest(); renderWindow(); updateUI(); }
+    })(t0);
+  }
+
+  function closeTocPopover() { root.classList.remove('toc-popped'); if (tocBtn) tocBtn.setAttribute('aria-expanded', 'false'); }
+
+  toc.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-page]');
+    if (!b || busy) return;
+    closeTocPopover();
+    jumpTo(+b.dataset.page);
+  });
+  if (tocBtn) tocBtn.addEventListener('click', () => {
+    const open = root.classList.toggle('toc-popped');
+    tocBtn.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e) => {
+    if (root.classList.contains('toc-popped') && !toc.contains(e.target) && !(tocBtn && tocBtn.contains(e.target))) closeTocPopover();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeTocPopover(); });
+
   //rendering pages to canvas (only a window around the reader)
-  function renderWindow() {
-    const centre = spread ? current * 2 - 0.5 : current;
+  function windowFor(cur) {
+    const centre = spread ? cur * 2 - 0.5 : cur;
     const reach = spread ? 6 : 4;
     const want = [];
     for (let p = Math.max(0, Math.ceil(centre - reach)); p <= Math.min(N - 1, Math.floor(centre + reach + 1)); p++) want.push(p);
-    want.sort((a, b) => Math.abs(a - centre) - Math.abs(b - centre));
+    return want.sort((a, b) => Math.abs(a - centre) - Math.abs(b - centre));
+  }
+
+  // extraCur: also prepare the pages around another position (used while jumping, so the landing spread is ready)
+  function renderWindow(extraCur) {
+    const want = (extraCur != null ? windowFor(extraCur) : []).concat(windowFor(current));
     const keep = new Set(want);
     rendered.forEach((p) => {                              // free memory for far-away pages
       if (!keep.has(p)) { const c = canvases.get(p); if (c) { c.width = c.height = 0; c.classList.remove('ready'); } rendered.delete(p); }
     });
-    queue = want.filter((p) => !rendered.has(p));
+    queue = Array.from(keep).filter((p) => !rendered.has(p));
     pump();
   }
 
@@ -1994,9 +2119,11 @@ const backToTop = document.getElementById("backToTop");
         const page = await pdf.getPage(p + 1);
         if (g !== gen) break;
         const v0 = page.getViewport({ scale: 1 });
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const v = page.getViewport({ scale: Math.min(pageW * dpr / v0.width, pageH * dpr / v0.height) });
-        c.width = Math.floor(v.width); c.height = Math.floor(v.height);
+        // Whole-number screens (100%, 200%, 300%): one canvas pixel per screen pixel, so PDF.js draws text at its final size.
+        // Fractional screens (125%, 150%): draw at 2x so the browser shrinks it cleanly instead of stretching it awkwardly.
+        const k = Number.isInteger(pxRatio) ? 1 : 2;
+        const v = page.getViewport({ scale: Math.min(pageDev / v0.width, pageHDev / v0.height) * k });
+        c.width = pageDev * k; c.height = pageHDev * k;
         await page.render({ canvasContext: c.getContext('2d'), viewport: v }).promise;
         if (g === gen) { rendered.add(p); c.classList.add('ready'); }
       } catch (e) { /* skip a page that fails to render */ }
@@ -2017,6 +2144,8 @@ const backToTop = document.getElementById("backToTop");
       if (current === 0) txt = 'Cover';
     }
     status.textContent = txt;
+    root.classList.toggle('toc-open', current > 0);              // page list appears once the cover is opened
+    markToc(spread ? [current > 0 ? current * 2 - 1 : -1, current * 2 < N ? current * 2 : -1] : [current]);
   }
 
   //peek: pages lift slightly when the mouse nears an edge
