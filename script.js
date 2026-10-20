@@ -1781,6 +1781,7 @@ const backToTop = document.getElementById("backToTop");
   const tocSections = root.querySelector('.book-toc-sections');
   const tocPages = root.querySelector('.book-toc-pages');
   const tocBtn   = root.querySelector('[data-book-toc]');
+  const resetBtn = root.querySelector('[data-book-reset]');
   const TOC_W = 190, TOC_GAP = 24;     // side panel width + gap (px) on wide screens
 
   const PDFJS  = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
@@ -2226,6 +2227,37 @@ const backToTop = document.getElementById("backToTop");
     const spineX = spread ? r.left + pageW : r.left + pageW * 0.35;
     go(e.clientX >= spineX ? 1 : -1);
   }
+
+
+
+  //reset: put the book back on the cover and redraw it, without reloading the whole website
+  let resetting = false;
+  function resetBook() {
+    if (resetting) return;
+    if (!pdf) { if (!starting) start(); return; }       // never loaded (or failed): just try loading it again
+    resetting = true;
+    if (resetBtn) resetBtn.classList.add('is-spinning');
+    const go = () => {
+      if (busy || drag) { setTimeout(go, 60); return; } // wait for a page turn / drag to finish
+      closeTocPopover(); clearPeek();
+      root.classList.remove('is-ready');                // shows the "Opening…" state for a moment
+      loading.textContent = 'Refreshing the portfolio…';
+      current = 0; leaves = [];                         // forces a full rebuild from the cover
+      toc.scrollTo({ top: 0 });
+      setTimeout(() => {
+        layout();
+        loading.textContent = '';
+        root.classList.add('is-ready');
+        resetting = false;
+        if (resetBtn) resetBtn.classList.remove('is-spinning');
+        if (!reduce) setTimeout(introNudge, 500);
+      }, reduce ? 0 : 250);
+    };
+    go();
+  }
+  if (resetBtn) resetBtn.addEventListener('click', resetBook);
+
+
 
   //buttons, keyboard, full screen
   prevBtn.addEventListener('click', () => go(-1));

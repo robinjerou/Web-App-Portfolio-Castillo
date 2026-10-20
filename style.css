@@ -1970,6 +1970,7 @@ body {
 .book-retry:disabled { pointer-events: none; }
 .book-retry.is-spinning svg { animation: book-spin 0.7s linear infinite; }
 @keyframes book-spin { to { transform: rotate(360deg); } }
+.book-reset.is-spinning svg { animation: book-spin 0.7s linear infinite; }
 .book-wrap.is-ready .book-loading { display: none; }
 
 .book-shift {
