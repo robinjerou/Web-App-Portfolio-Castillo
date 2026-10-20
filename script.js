@@ -1941,13 +1941,13 @@ const backToTop = document.getElementById("backToTop");
 
   //painting
   const zFor = (i) => (i < current ? i + 1 : L - i);
-
-  function paint(i, a) {
+  
+  function paint(i, a, keep3d) {
     const l = leaves[i];
     // At rest (0° / 180°) leaves are drawn flat, with no 3D transform, so the page bitmap is never resampled = sharpest text.
     // Only while a page is actually turning does it use the 3D rotation.
     if (a === 0) { l.classList.remove('is-left'); l.style.transform = 'none'; }
-    else if (a === 180) { l.classList.add('is-left'); l.style.transform = 'translateX(-100%)'; }
+    else if (a === 180 && !keep3d) { l.classList.add('is-left'); l.style.transform = 'translateX(-100%)'; }
     else { l.classList.remove('is-left'); l.style.transform = 'rotateY(' + -a + 'deg)'; }
     l.style.setProperty('--shade', Math.sin(a * Math.PI / 180).toFixed(3));
   }
@@ -2152,9 +2152,22 @@ const backToTop = document.getElementById("backToTop");
   //peek: pages lift slightly when the mouse nears an edge
   function setPeek(w) {
     if (peek && w && peek.i === w.i) return;
-    if (peek) { const i = peek.i; paint(i, i < current ? 180 : 0); setTimeout(() => { if (!peek || peek.i !== i) { leaves[i].classList.remove('peek'); leaves[i].style.zIndex = zFor(i); } }, 320); }
+    if (peek) {
+      const i = peek.i;
+      paint(i, i < current ? 180 : 0, true);   // ease back to rest using the SAME rotateY form, so left pages animate like right ones
+      setTimeout(() => {
+        if (!peek || peek.i !== i) {
+          leaves[i].classList.remove('peek'); leaves[i].style.zIndex = zFor(i);
+          if (!busy && !drag) paint(i, i < current ? 180 : 0);   // then drop back to the flat, sharp resting state
+        }
+      }, 320);
+    }
     peek = w;
-    if (w) { const l = leaves[w.i]; l.classList.add('peek'); l.style.zIndex = L + 5; paint(w.i, w.a); }
+    if (w) {
+      const l = leaves[w.i];
+      if (w.i < current && !l.classList.contains('peek')) { paint(w.i, 180, true); void l.offsetWidth; }   // left leaf: start from rotateY(-180deg) (looks identical to its flat rest) so the lift interpolates cleanly
+      l.classList.add('peek'); l.style.zIndex = L + 5; paint(w.i, w.a);
+    }
   }
   function clearPeek() {
     if (!peek) return;
