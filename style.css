@@ -2045,6 +2045,19 @@ body {
 .book-controls .about-arrow:disabled { opacity: 0.35; pointer-events: none; }
 .book-controls button[hidden] { display: none; }
 
+/* Minimize / exit full screen button: top-right corner, only while in full screen */
+.book-fs-exit {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 30;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.book-wrap:fullscreen .book-fs-exit { display: flex; }
+.book-fs-exit[hidden] { display: none !important; }
+
 @media (prefers-reduced-motion: reduce) {
   .leaf.peek, .face canvas { transition: none; }
 }

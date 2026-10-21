@@ -1782,6 +1782,7 @@ const backToTop = document.getElementById("backToTop");
   const tocPages = root.querySelector('.book-toc-pages');
   const tocBtn   = root.querySelector('[data-book-toc]');
   const resetBtn = root.querySelector('[data-book-reset]');
+  const fsExitBtn = root.querySelector('[data-book-fs-exit]');
   const TOC_W = 190, TOC_GAP = 24;     // side panel width + gap (px) on wide screens
 
   const PDFJS  = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
@@ -2281,9 +2282,10 @@ const backToTop = document.getElementById("backToTop");
   });
 
   if (fsBtn) {
-    if (!root.requestFullscreen) fsBtn.hidden = true;
+    if (!root.requestFullscreen) { fsBtn.hidden = true; if (fsExitBtn) fsExitBtn.hidden = true; }
     else {
       fsBtn.addEventListener('click', () => (document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen()));
+      if (fsExitBtn) fsExitBtn.addEventListener('click', () => { if (document.fullscreenElement) document.exitFullscreen(); });
       document.addEventListener('fullscreenchange', () => {
         fsBtn.textContent = document.fullscreenElement === root ? 'Exit full screen' : 'Full screen';
         setTimeout(() => { if (pdf && !busy) layout(); }, 80);
